@@ -1,22 +1,25 @@
 import React, { useState, useMemo } from 'react';
 import { Bar, Pie, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, ArcElement, BarElement, Tooltip, Legend } from 'chart.js';
+import { Button } from "./components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./components/ui/table";
 
 ChartJS.register(CategoryScale, LinearScale, ArcElement, BarElement, Tooltip, Legend);
 
-
 const PlacementStats = () => {
   // 1. Mock data with `type`
-  const records = [
+  const records = useMemo(() => [
     { year: 2023, branch: 'CSE', package: 45, company: 'Google', type: 'Tech' },
     { year: 2023, branch: 'ECE', package: 22, company: 'Microsoft', type: 'Tech' },
     { year: 2024, branch: 'CSE', package: 30, company: 'Amazon', type: 'Tech' },
-    { year: 2024, branch: 'ME',  package: 12, company: 'TCS', type: 'Core' },
+    { year: 2024, branch: 'ME', package: 12, company: 'TCS', type: 'Core' },
     { year: 2024, branch: 'CSE', package: 28, company: 'Meta', type: 'Tech' },
     { year: 2023, branch: 'EE', package: 18, company: 'Deloitte', type: 'Consulting' },
     { year: 2024, branch: 'ECE', package: 24, company: 'Bain & Co.', type: 'Consulting' },
     { year: 2023, branch: 'CSE', package: 14, company: 'Infosys', type: 'Core' },
-  ];
+  ], []);
 
   const [yearFilter, setYearFilter] = useState('');
   const [branchFilter, setBranchFilter] = useState('');
@@ -26,10 +29,10 @@ const PlacementStats = () => {
 
   const [showOffers, setShowOffers] = useState(false);
 
-  const years     = [...new Set(records.map(r => r.year))];
-  const branches  = [...new Set(records.map(r => r.branch))];
+  const years = [...new Set(records.map(r => r.year))];
+  const branches = [...new Set(records.map(r => r.branch))];
   const companies = [...new Set(records.map(r => r.company))];
-  const types     = [...new Set(records.map(r => r.type))];
+  const types = [...new Set(records.map(r => r.type))];
   const lpaRanges = ['< 20', '20-30', '> 30'];
 
   // Filter logic
@@ -49,7 +52,7 @@ const PlacementStats = () => {
 
       return true;
     });
-  }, [yearFilter, branchFilter, companyFilter, lpaFilter, typeFilter]);
+  }, [records, yearFilter, branchFilter, companyFilter, lpaFilter, typeFilter]);
 
   const stats = useMemo(() => {
     if (filtered.length === 0) {
@@ -65,165 +68,176 @@ const PlacementStats = () => {
     return { highest, average: avg, median, total };
   }, [filtered]);
 
-  //📊 1. Year-wise Bar Chart
-  const yearData = {};
-filtered.forEach(offer => {
-  yearData[offer.year] = (yearData[offer.year] || 0) + 1;
-});
+  // Chart data
+  const yearData = useMemo(() => {
+    const data = {};
+    filtered.forEach(offer => {
+      data[offer.year] = (data[offer.year] || 0) + 1;
+    });
+    return {
+      labels: Object.keys(data),
+      datasets: [{
+        label: 'Offers per Year',
+        data: Object.values(data),
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+      }],
+    };
+  }, [filtered]);
 
-const yearChartData = {
-  labels: Object.keys(yearData),
-  datasets: [
-    {
-      label: 'Offers per Year',
-      data: Object.values(yearData),
-      backgroundColor: 'rgba(54, 162, 235, 0.6)',
-    },
-  ],
-};
+  const branchData = useMemo(() => {
+    const data = {};
+    filtered.forEach(offer => {
+      data[offer.branch] = (data[offer.branch] || 0) + 1;
+    });
+    return {
+      labels: Object.keys(data),
+      datasets: [{
+        data: Object.values(data),
+        backgroundColor: ['#4bc0c0', '#36a2eb', '#9966ff', '#ff6384', '#ff9f40'],
+      }],
+    };
+  }, [filtered]);
 
-   //📊 2. Branch-wise Pie Chart
-   const branchData = {};
-filtered.forEach(offer => {
-  branchData[offer.branch] = (branchData[offer.branch] || 0) + 1;
-});
+  const typeData = useMemo(() => {
+    const data = {};
+    filtered.forEach(offer => {
+      data[offer.type] = (data[offer.type] || 0) + 1;
+    });
+    return {
+      labels: Object.keys(data),
+      datasets: [{
+        data: Object.values(data),
+        backgroundColor: ['#FFCE56', '#FF6384', '#36A2EB'],
+      }],
+    };
+  }, [filtered]);
 
-const branchChartData = {
-  labels: Object.keys(branchData),
-  datasets: [
-    {
-      data: Object.values(branchData),
-      backgroundColor: ['#4bc0c0', '#36a2eb', '#9966ff', '#ff6384', '#ff9f40'],
-    },
-  ],
-};
-   
-  //📊 3. Company Type Doughnut Chart
-  const typeData = {};
-filtered.forEach(offer => {
-  typeData[offer.companyType] = (typeData[offer.companyType] || 0) + 1;
-});
-
-const typeChartData = {
-  labels: Object.keys(typeData),
-  datasets: [
-    {
-      data: Object.values(typeData),
-      backgroundColor: ['#FFCE56', '#FF6384', '#36A2EB'],
-    },
-  ],
-};
-   
-  
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <h2 className="text-3xl font-bold text-center mb-6">📊 Placement Statistics</h2>
+    <div className="min-h-screen bg-background text-foreground py-8 px-4">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-6">📊 Placement Statistics</h2>
 
-      {/* Filters */}
-      <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-5 gap-4 mb-8">
-        <select value={yearFilter} onChange={e => setYearFilter(e.target.value)} className="p-2 border rounded">
-          <option value="">All Years</option>
-          {years.map(y => <option key={y} value={y}>{y}</option>)}
-        </select>
+        {/* Filters */}
+        <Card className="mb-8">
+          <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <Select onValueChange={setYearFilter} defaultValue="all">
+              <SelectTrigger><SelectValue placeholder="All Years" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Years</SelectItem>
+                {years.map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select onValueChange={setBranchFilter} defaultValue="all">
+              <SelectTrigger><SelectValue placeholder="All Branches" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Branches</SelectItem>
+                {branches.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select onValueChange={setLpaFilter} defaultValue="all">
+              <SelectTrigger><SelectValue placeholder="All Packages" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Packages</SelectItem>
+                {lpaRanges.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select onValueChange={setCompanyFilter} defaultValue="all">
+              <SelectTrigger><SelectValue placeholder="All Companies" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Companies</SelectItem>
+                {companies.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select onValueChange={setTypeFilter} defaultValue="all">
+              <SelectTrigger><SelectValue placeholder="All Types" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {types.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
 
-        <select value={branchFilter} onChange={e => setBranchFilter(e.target.value)} className="p-2 border rounded">
-          <option value="">All Branches</option>
-          {branches.map(b => <option key={b} value={b}>{b}</option>)}
-        </select>
+        {/* Stats Cards */}
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 mb-12">
+          <Card>
+            <CardHeader><CardTitle>Total Records</CardTitle></CardHeader>
+            <CardContent><p className="text-2xl font-bold">{stats.total}</p></CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle>Highest Package</CardTitle></CardHeader>
+            <CardContent><p className="text-2xl font-bold">₹{stats.highest} LPA</p></CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle>Average Package</CardTitle></CardHeader>
+            <CardContent><p className="text-2xl font-bold">₹{stats.average} LPA</p></CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle>Median Package</CardTitle></CardHeader>
+            <CardContent><p className="text-2xl font-bold">₹{stats.median} LPA</p></CardContent>
+          </Card>
+        </div>
 
-        <select value={lpaFilter} onChange={e => setLpaFilter(e.target.value)} className="p-2 border rounded">
-          <option value="">All Packages</option>
-          {lpaRanges.map(r => <option key={r} value={r}>{r}</option>)}
-        </select>
+        {/* Charts */}
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
+          <Card className="lg:col-span-1">
+            <CardHeader><CardTitle className="text-center">Year-wise Offers</CardTitle></CardHeader>
+            <CardContent><Bar data={yearData} /></CardContent>
+          </Card>
+          <Card className="lg:col-span-1">
+            <CardHeader><CardTitle className="text-center">Branch-wise Distribution</CardTitle></CardHeader>
+            <CardContent><Pie data={branchData} /></CardContent>
+          </Card>
+          <Card className="lg:col-span-1">
+            <CardHeader><CardTitle className="text-center">Company Type</CardTitle></CardHeader>
+            <CardContent><Doughnut data={typeData} /></CardContent>
+          </Card>
+        </div>
 
-        <select value={companyFilter} onChange={e => setCompanyFilter(e.target.value)} className="p-2 border rounded">
-          <option value="">All Companies</option>
-          {companies.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
+        {/* Offer Details */}
+        <div>
+          <Button onClick={() => setShowOffers(!showOffers)}>
+            {showOffers ? '🔼 Hide Offer Details' : '🔽 View Offer Details'}
+          </Button>
 
-        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="p-2 border rounded">
-          <option value="">All Types</option>
-          {types.map(t => <option key={t} value={t}>{t}</option>)}
-        </select>
+          {showOffers && (
+            <Card className="mt-6">
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Company</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Branch</TableHead>
+                      <TableHead>CTC (LPA)</TableHead>
+                      <TableHead>Type</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filtered.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center">No offers match your current filters.</TableCell>
+                      </TableRow>
+                    ) : (
+                      filtered.map((offer, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{offer.company}</TableCell>
+                          <TableCell>{offer.role || '—'}</TableCell>
+                          <TableCell>{offer.branch}</TableCell>
+                          <TableCell>₹{offer.package}</TableCell>
+                          <TableCell>{offer.type}</TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
-
-      {/* Stats Cards */}
-      <div className="max-w-5xl mx-auto grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-        <div className="bg-white p-6 rounded-xl shadow text-center">
-          <h3 className="text-sm text-gray-500">Total Records</h3>
-          <p className="text-2xl font-bold">{stats.total}</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow text-center">
-          <h3 className="text-sm text-gray-500">Highest Package</h3>
-          <p className="text-2xl font-bold">₹{stats.highest} LPA</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow text-center">
-          <h3 className="text-sm text-gray-500">Average Package</h3>
-          <p className="text-2xl font-bold">₹{stats.average} LPA</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow text-center">
-          <h3 className="text-sm text-gray-500">Median Package</h3>
-          <p className="text-2xl font-bold">₹{stats.median} LPA</p>
-        </div>
-      </div>
-
-       
-      <div className="my-12 space-y-12">
-  <h3 className="text-2xl font-bold text-center">📊 Placement Visualizations</h3>
-
-  <div className="max-w-4xl mx-auto">
-    <h4 className="text-lg font-semibold mb-2 text-center">Year-wise Offers</h4>
-    <Bar data={yearChartData} />
-  </div>
-
-  <div className="max-w-4xl mx-auto">
-    <h4 className="text-lg font-semibold mb-2 text-center">Branch-wise Distribution</h4>
-    <Pie data={branchChartData} />
-  </div>
-
-  <div className="max-w-4xl mx-auto">
-    <h4 className="text-lg font-semibold mb-2 text-center">Company Type</h4>
-    <Doughnut data={typeChartData} />
-  </div>
-</div>
-
-
-      <div className="max-w-5xl mx-auto mt-8">
-  <button
-    onClick={() => setShowOffers(!showOffers)}
-    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-  >
-    {showOffers ? '🔼 Hide Offer Details' : '🔽 View Offer Details'}
-  </button>
-
-  {showOffers && (
-    <div className="mt-6 bg-white p-4 rounded-xl shadow space-y-4 max-h-[400px] overflow-y-auto">
-      {filtered.length === 0 ? (
-        <p className="text-center text-gray-500">No offers match your current filters.</p>
-      ) : (
-        filtered.map((offer, index) => (
-          <div
-            key={index}
-            className="border-b pb-2 mb-2 flex flex-col sm:flex-row sm:justify-between text-sm text-gray-700"
-          >
-            <span><strong>Company:</strong> {offer.company}</span>
-            <span><strong>Role:</strong> {offer.role || '—'}</span>
-            <span><strong>Branch:</strong> {offer.branch}</span>
-            <span><strong>CTC:</strong> ₹{offer.package} LPA</span>
-            <span><strong>Type:</strong> {offer.type}</span>
-          </div>
-        ))
-      )}
-        </div>
-    )}
-    </div>
-
     </div>
   );
 };
 
 export default PlacementStats;
-

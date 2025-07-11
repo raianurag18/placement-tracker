@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Button } from "./components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
+import { Input } from "./components/ui/input";
+import { Label } from "./components/ui/label";
+import { Textarea } from "./components/ui/textarea";
 
 const SubmitExperience = () => {
   const [formData, setFormData] = useState({
     name: '',
     company: '',
     role: '',
-    ctc: '',
+    package: '',
     experience: ''
   });
 
@@ -36,22 +41,22 @@ const SubmitExperience = () => {
         body: JSON.stringify(formData),
       });
 
-        if (res.ok) {
-  setSuccess('✅ Thanks! Your experience was submitted.');
-  setError('');
-  setFormData({
-    name: '',
-    company: '',
-    role: '',
-    package: '',
-    experience: ''
-  });
+      if (res.ok) {
+        setSuccess('✅ Thanks! Your experience was submitted.');
+        setError('');
+        setFormData({
+          name: '',
+          company: '',
+          role: '',
+          package: '',
+          experience: ''
+        });
 
-  // Optional: Auto-hide success after 5 seconds
-  setTimeout(() => {
-    setSuccess('');
-  }, 5000);
-}
+        // Optional: Auto-hide success after 5 seconds
+        setTimeout(() => {
+          setSuccess('');
+        }, 5000);
+      }
       else {
         alert('Something went wrong. Please try again later.');
       }
@@ -62,74 +67,88 @@ const SubmitExperience = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4">
-      <Link to="/" className="text-blue-600 underline mb-6 inline-block">
-        ← Back to Home
-      </Link>
+    <div className="min-h-screen bg-background text-foreground py-12 px-4">
+      <div className="max-w-3xl mx-auto">
+        <Button asChild variant="link" className="mb-6">
+          <Link to="/">
+            ← Back to Home
+          </Link>
+        </Button>
 
-      <h2 className="text-2xl font-bold text-center mb-8">
-        Submit Your Interview Experience
-      </h2>
-
-      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow space-y-6">
-          {success && <p className="text-green-600 text-center">{success}</p>}
-          {error && <p className="text-red-600 text-center">{error}</p>}
-        <input
-          name="name"
-          type="text"
-          placeholder="Your Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md"
-        />
-
-        <input
-          name="company"
-          type="text"
-          placeholder="Company"
-          value={formData.company}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md"
-        />
-
-        <div className="flex space-x-4">
-          <input
-            name="role"
-            type="text"
-            placeholder="Role"
-            value={formData.role}
-            onChange={handleChange}
-            className="w-1/2 px-4 py-2 border border-gray-300 rounded-md"
-          />
-          <input
-            name="ctc"
-            type="text"
-            placeholder="Package"
-            value={formData.ctc}
-            onChange={handleChange}
-            className="w-1/2 px-4 py-2 border border-gray-300 rounded-md"
-          />
-        </div>
-
-        <textarea
-          name="experience"
-          rows="5"
-          placeholder="Write your experience..."
-          value={formData.experience}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md"
-        ></textarea>
-
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-md"
-        >
-          Submit
-        </button>
-      </form>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Submit Your Interview Experience</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {success && <p className="text-green-600 text-center">{success}</p>}
+              {error && <p className="text-red-600 text-center">{error}</p>}
+              <div className="grid gap-2">
+                <Label htmlFor="name">Your Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="Your Name"
+                  value={formData.name}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="company">Company</Label>
+                <Input
+                  id="company"
+                  name="company"
+                  type="text"
+                  placeholder="Company"
+                  value={formData.company}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="role">Role</Label>
+                  <Input
+                    id="role"
+                    name="role"
+                    type="text"
+                    placeholder="Role"
+                    value={formData.role}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="package">Package</Label>
+                  <Input
+                    id="package"
+                    name="package"
+                    type="text"
+                    placeholder="e.g., 12 LPA"
+                    value={formData.package}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="experience">Your Experience</Label>
+                <Textarea
+                  id="experience"
+                  name="experience"
+                  rows="5"
+                  placeholder="Write your experience..."
+                  value={formData.experience}
+                  onChange={handleChange}
+                />
+              </div>
+              <Button type="submit" className="w-full">
+                Submit
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
 
 export default SubmitExperience;
-
