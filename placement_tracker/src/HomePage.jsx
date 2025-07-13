@@ -3,23 +3,34 @@ import { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
-import { Briefcase, DollarSign, Users, BarChart } from 'lucide-react';
+import { Briefcase, DollarSign, Users, BarChart, User, FileText } from 'lucide-react';
 
-const HomePage = () => {
+const HomePage = ({ user }) => {
   const [experiences, setExperiences] = useState([]);
+  const [stats, setStats] = useState({
+    totalCompanies: 0,
+    totalOffers: 0,
+    highestPackage: 0,
+    averagePackage: 0,
+  });
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/experiences")
+    fetch("http://localhost:5000/api/experiences", { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => setExperiences(data))
       .catch((err) => console.error("Error fetching experiences:", err));
+
+    fetch("http://localhost:5000/api/placements/stats", { credentials: 'include' })
+      .then((res) => res.json())
+      .then((data) => setStats(data))
+      .catch((err) => console.error("Error fetching stats:", err));
   }, []);
 
-  const stats = [
-    { title: "Total Companies", value: "95+", icon: <Briefcase className="h-8 w-8 text-blue-500" /> },
-    { title: "Total Offers", value: "300+", icon: <Users className="h-8 w-8 text-green-500" /> },
-    { title: "Highest Package", value: "₹ 45 LPA", icon: <DollarSign className="h-8 w-8 text-yellow-500" /> },
-    { title: "Average Package", value: "₹ 8.5 LPA", icon: <BarChart className="h-8 w-8 text-indigo-500" /> },
+  const displayStats = [
+    { title: "Total Companies", value: stats.totalCompanies, icon: <Briefcase className="h-8 w-8 text-blue-500" />, link: "/companies" },
+    { title: "Total Offers", value: stats.totalOffers, icon: <Users className="h-8 w-8 text-green-500" /> },
+    { title: "Highest Package", value: `₹ ${stats.highestPackage} LPA`, icon: <DollarSign className="h-8 w-8 text-yellow-500" />, link: "/highest-package-branch" },
+    { title: "Average Package", value: `₹ ${stats.averagePackage.toFixed(2)} LPA`, icon: <BarChart className="h-8 w-8 text-indigo-500" />, link: "/branch-stats" },
   ];
 
   return (
@@ -37,6 +48,11 @@ const HomePage = () => {
                 <Link to="/stats"><Button variant="ghost">Stats</Button></Link>
                 <Link to="/submit"><Button variant="ghost">Submit Experience</Button></Link>
                 <Link to="/about"><Button variant="ghost">About</Button></Link>
+                {user ? (
+                  <a href="http://localhost:5000/auth/logout"><Button>Logout</Button></a>
+                ) : (
+                  <a href="http://localhost:5000/auth/google"><Button>Login with Google</Button></a>
+                )}
                 <Link to="/admin"><Button>Admin Login</Button></Link>
               </div>
             </div>
@@ -63,16 +79,18 @@ const HomePage = () => {
             Placement Overview - 2024
           </h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {stats.map((stat, index) => (
-              <Card key={index}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                  {stat.icon}
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                </CardContent>
-              </Card>
+            {displayStats.map((stat, index) => (
+              <Link to={stat.link || '#'} key={index}>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                    {stat.icon}
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </section>
@@ -148,6 +166,50 @@ const HomePage = () => {
             </div>
           </div>
         </section>
+        {user && (
+          <section className="mb-12">
+            <h2 className="text-3xl font-extrabold text-center mb-8">
+              Student Zone
+            </h2>
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <User className="mr-2" /> My Profile
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>View and update your profile information.</p>
+                  <Button className="mt-4">Go to Profile</Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <FileText className="mr-2" /> My Experiences
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>See the interview experiences you've submitted.</p>
+                  <Button className="mt-4">View My Submissions</Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <BarChart className="mr-2" /> Placement Stats
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>Explore detailed placement statistics.</p>
+                  <Link to="/stats"><Button className="mt-4">Explore Stats</Button></Link>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );

@@ -5,15 +5,17 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const Admin = require('./models/Admin');
+const User = require('./models/User');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 require('./config/passport');
 
 const authRoutes = require('./routes/auth');
+const placementRoutes = require('./routes/placements.js');
 
 const app = express();
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true,
 }));
 app.use(express.json());
@@ -28,11 +30,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // MongoDB connection
-mongoose.connect('mongodb://127.0.0.1:27017/placement_tracker', {
+mongoose.connect(process.env.MONGO_URI, {
 })
 .then(() => {
   console.log('✅ MongoDB connected');
-  createDummyAdmin(); // ← Add this here
 })
 .catch((err) => console.error('❌ MongoDB connection error:', err));
 
@@ -42,9 +43,25 @@ passport.use(new GoogleStrategy({
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   callbackURL: "http://localhost:5000/auth/google/callback",
 },
-(accessToken, refreshToken, profile, done) => {
-  // User handling logic here
-  return done(null, profile);
+async (accessToken, refreshToken, profile, done) => {
+  const newUser = {
+    googleId: profile.id,
+    name: profile.displayName,
+    email: profile.emails[0].value,
+  };
+
+  try {
+    let user = await User.findOne({ googleId: profile.id });
+
+    if (user) {
+      done(null, user);
+    } else {
+      user = await User.create(newUser);
+      done(null, user);
+    }
+  } catch (err) {
+    console.error(err);
+  }
 }));
 
 passport.serializeUser((user, done) => {
@@ -54,7 +71,9 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-// Routes 
+// Routes
+app.use('/api/placements', placementRoutes);
+
 app.get('/auth/google', (req, res, next) => {
   console.log('🔄 /auth/google route hit');
   next();
@@ -70,6 +89,17 @@ app.get('/auth/google/callback',
 
 app.get('/login-failure', (req, res) => {
   res.send('Login Failed');
+});
+
+app.get('/api/current_user', (req, res) => {
+  res.send(req.user);
+});
+
+app.get('/auth/logout', (req, res, next) => {
+  req.logout(function(err) {
+    if (err) { return next(err); }
+    res.redirect('http://localhost:3000');
+  });
 });
 
 

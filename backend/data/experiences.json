@@ -1,0 +1,82 @@
+[
+  {
+    "studentName": "Aarav Sharma",
+    "companyName": "Google",
+    "role": "Software Engineer",
+    "package": 25,
+    "year": 2023,
+    "experience": "The interview process was challenging but rewarding. Focused on data structures and algorithms."
+  },
+  {
+    "studentName": "Diya Patel",
+    "companyName": "Microsoft",
+    "role": "Product Manager",
+    "package": 22,
+    "year": 2023,
+    "experience": "Great experience, the case studies were very insightful. The culture seems amazing."
+  },
+  {
+    "studentName": "Rohan Kumar",
+    "companyName": "Amazon",
+    "role": "Data Scientist",
+    "package": 20,
+    "year": 2023,
+    "experience": "The technical rounds were in-depth. Be prepared for questions on machine learning concepts."
+  },
+  {
+    "studentName": "Priya Singh",
+    "companyName": "Flipkart",
+    "role": "Software Development Engineer",
+    "package": 18,
+    "year": 2023,
+    "experience": "The hiring process was smooth. The bar is high, but the team is very supportive."
+  },
+  {
+    "studentName": "Aditya Verma",
+    "companyName": "Adobe",
+    "role": "UI/UX Designer",
+    "package": 19,
+    "year": 2023,
+    "experience": "Portfolio review was the most important part. They look for creativity and a strong design sense."
+  },
+  {
+    "studentName": "Ananya Gupta",
+    "companyName": "Oracle",
+    "role": "Database Administrator",
+    "package": 17,
+    "year": 2022,
+    "experience": "Strong knowledge of SQL and database design is a must. The technical interview was very practical."
+  },
+  {
+    "studentName": "Vikram Rathore",
+    "companyName": "Salesforce",
+    "role": "Cloud Engineer",
+    "package": 21,
+    "year": 2022,
+    "experience": "Experience with cloud platforms like AWS or Azure is crucial. The interview process was very hands-on."
+  },
+  {
+    "studentName": "Isha Sharma",
+    "companyName": "Zomato",
+    "role": "Marketing Analyst",
+    "package": 15,
+    "year": 2022,
+    "experience": "They value a data-driven approach to marketing. The case study was based on real-world scenarios."
+  },
+  {
+    "studentName": "Kabir Khan",
+    "companyName": "Swiggy",
+    "role": "Operations Manager",
+    "package": 16,
+    "year": 2022,
+    "experience": "Problem-solving and analytical skills are key. The interview process tests your ability to handle pressure."
+  },
+  {
+    "studentName": "Sneha Reddy",
+    "companyName": "Paytm",
+    "role": "Financial Analyst",
+    "package": 14,
+    "year": 2022,
+    "experience": "A good understanding of financial modeling and valuation is required. The technical rounds were intense."
+  }
+]
