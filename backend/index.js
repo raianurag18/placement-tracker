@@ -44,10 +44,15 @@ passport.use(new GoogleStrategy({
   callbackURL: "http://localhost:5000/auth/google/callback",
 },
 async (accessToken, refreshToken, profile, done) => {
+  const email = profile.emails[0].value;
+  if (!email.endsWith('@bitmesra.ac.in')) {
+    return done(null, false, { message: 'Please use your college mail' });
+  }
+
   const newUser = {
     googleId: profile.id,
     name: profile.displayName,
-    email: profile.emails[0].value,
+    email: email,
   };
 
   try {
@@ -82,7 +87,7 @@ app.get('/auth/google', (req, res, next) => {
 
 app.get('/auth/google/callback',
   passport.authenticate('google', {
-    failureRedirect: '/login-failure',
+    failureRedirect: 'http://localhost:3000/login-failure',
     successRedirect: 'http://localhost:3000/', // or your frontend dashboard
   })
 );

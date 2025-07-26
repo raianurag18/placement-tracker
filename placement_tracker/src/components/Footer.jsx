@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap justify-between">
           <div className="w-full md:w-1/3 mb-6 md:mb-0">
-            <h2 className="text-2xl font-bold mb-2">Placement Tracker</h2>
+            <h2 className="text-2xl font-bold mb-2">Placerra</h2>
             <p className="text-gray-400">
               A platform to track and share placement experiences.
             </p>

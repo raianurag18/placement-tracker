@@ -1,64 +1,60 @@
-import React, { useState, useMemo } from 'react';
-import { Bar, Pie, Doughnut } from 'react-chartjs-2';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, ArcElement, BarElement, Tooltip, Legend } from 'chart.js';
-import { Button } from "./components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./components/ui/table";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 
 ChartJS.register(CategoryScale, LinearScale, ArcElement, BarElement, Tooltip, Legend);
 
 const PlacementStats = () => {
-  // 1. Mock data with `type`
-  const records = useMemo(() => [
-    { year: 2023, branch: 'CSE', package: 45, company: 'Google', type: 'Tech' },
-    { year: 2023, branch: 'ECE', package: 22, company: 'Microsoft', type: 'Tech' },
-    { year: 2024, branch: 'CSE', package: 30, company: 'Amazon', type: 'Tech' },
-    { year: 2024, branch: 'ME', package: 12, company: 'TCS', type: 'Core' },
-    { year: 2024, branch: 'CSE', package: 28, company: 'Meta', type: 'Tech' },
-    { year: 2023, branch: 'EE', package: 18, company: 'Deloitte', type: 'Consulting' },
-    { year: 2024, branch: 'ECE', package: 24, company: 'Bain & Co.', type: 'Consulting' },
-    { year: 2023, branch: 'CSE', package: 14, company: 'Infosys', type: 'Core' },
-  ], []);
-
+  const [placements, setPlacements] = useState([]);
   const [yearFilter, setYearFilter] = useState('');
   const [branchFilter, setBranchFilter] = useState('');
   const [companyFilter, setCompanyFilter] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
   const [lpaFilter, setLpaFilter] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-
   const [showOffers, setShowOffers] = useState(false);
 
-  const years = [...new Set(records.map(r => r.year))];
-  const branches = [...new Set(records.map(r => r.branch))];
-  const companies = [...new Set(records.map(r => r.company))];
-  const types = [...new Set(records.map(r => r.type))];
-  const lpaRanges = ['< 20', '20-30', '> 30'];
+  useEffect(() => {
+    fetch('http://localhost:5000/api/placements/all')
+      .then((res) => res.json())
+      .then((data) => setPlacements(data))
+      .catch((err) => console.error('Error fetching placements:', err));
+  }, []);
+
+  const years = useMemo(() => [...new Set(placements.map(p => p.year))].sort((a, b) => b - a), [placements]);
+  const branches = useMemo(() => [...new Set(placements.map(p => p.branch))].sort(), [placements]);
+  const companies = useMemo(() => [...new Set(placements.map(p => p.companyName))].sort(), [placements]);
+  const roles = useMemo(() => [...new Set(placements.map(p => p.role))].sort(), [placements]);
+  const lpaRanges = ['< 10', '10-20', '20-30', '> 30'];
 
   // Filter logic
   const filtered = useMemo(() => {
-    return records.filter(r => {
-      if (yearFilter && r.year !== +yearFilter) return false;
-      if (branchFilter && r.branch !== branchFilter) return false;
-      if (companyFilter && r.company !== companyFilter) return false;
-      if (typeFilter && r.type !== typeFilter) return false;
+    return placements.filter(p => {
+      if (yearFilter && p.year !== +yearFilter) return false;
+      if (branchFilter && p.branch !== branchFilter) return false;
+      if (companyFilter && p.companyName !== companyFilter) return false;
+      if (roleFilter && p.role !== roleFilter) return false;
 
       if (lpaFilter) {
-        const pkg = r.package;
-        if (lpaFilter === '< 20' && pkg >= 20) return false;
+        const pkg = p.package;
+        if (lpaFilter === '< 10' && pkg >= 10) return false;
+        if (lpaFilter === '10-20' && (pkg < 10 || pkg > 20)) return false;
         if (lpaFilter === '20-30' && (pkg < 20 || pkg > 30)) return false;
         if (lpaFilter === '> 30' && pkg <= 30) return false;
       }
 
       return true;
     });
-  }, [records, yearFilter, branchFilter, companyFilter, lpaFilter, typeFilter]);
+  }, [placements, yearFilter, branchFilter, companyFilter, lpaFilter, roleFilter]);
 
   const stats = useMemo(() => {
     if (filtered.length === 0) {
       return { highest: 0, average: 0, median: 0, total: 0 };
     }
-    const pkgs = filtered.map(r => r.package).sort((a, b) => a - b);
+    const pkgs = filtered.map(p => p.package).sort((a, b) => a - b);
     const total = pkgs.length;
     const sum = pkgs.reduce((a, b) => a + b, 0);
     const avg = (sum / total).toFixed(2);
@@ -75,7 +71,7 @@ const PlacementStats = () => {
       data[offer.year] = (data[offer.year] || 0) + 1;
     });
     return {
-      labels: Object.keys(data),
+      labels: Object.keys(data).sort((a, b) => a - b),
       datasets: [{
         label: 'Offers per Year',
         data: Object.values(data),
@@ -93,24 +89,27 @@ const PlacementStats = () => {
       labels: Object.keys(data),
       datasets: [{
         data: Object.values(data),
-        backgroundColor: ['#4bc0c0', '#36a2eb', '#9966ff', '#ff6384', '#ff9f40'],
+        backgroundColor: ['#4bc0c0', '#36a2eb', '#9966ff', '#ff6384', '#ff9f40', '#ffcd56'],
       }],
+    };
+  }, [filtered]);
+  
+  const roleData = useMemo(() => {
+    const data = {};
+    filtered.forEach(offer => {
+        data[offer.role] = (data[offer.role] || 0) + 1;
+    });
+    const sortedRoles = Object.entries(data).sort(([,a],[,b]) => b-a).slice(0, 10);
+    return {
+        labels: sortedRoles.map(([label]) => label),
+        datasets: [{
+            label: 'Top 10 Roles',
+            data: sortedRoles.map(([,value]) => value),
+            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+        }],
     };
   }, [filtered]);
 
-  const typeData = useMemo(() => {
-    const data = {};
-    filtered.forEach(offer => {
-      data[offer.type] = (data[offer.type] || 0) + 1;
-    });
-    return {
-      labels: Object.keys(data),
-      datasets: [{
-        data: Object.values(data),
-        backgroundColor: ['#FFCE56', '#FF6384', '#36A2EB'],
-      }],
-    };
-  }, [filtered]);
 
   return (
     <div className="min-h-screen bg-background text-foreground py-8 px-4">
@@ -120,39 +119,39 @@ const PlacementStats = () => {
         {/* Filters */}
         <Card className="mb-8">
           <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <Select onValueChange={setYearFilter} defaultValue="all">
+            <Select onValueChange={(value) => setYearFilter(value === 'all' ? '' : value)} defaultValue="">
               <SelectTrigger><SelectValue placeholder="All Years" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Years</SelectItem>
                 {years.map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select onValueChange={setBranchFilter} defaultValue="all">
+            <Select onValueChange={(value) => setBranchFilter(value === 'all' ? '' : value)} defaultValue="">
               <SelectTrigger><SelectValue placeholder="All Branches" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Branches</SelectItem>
                 {branches.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select onValueChange={setLpaFilter} defaultValue="all">
+            <Select onValueChange={(value) => setLpaFilter(value === 'all' ? '' : value)} defaultValue="">
               <SelectTrigger><SelectValue placeholder="All Packages" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Packages</SelectItem>
                 {lpaRanges.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select onValueChange={setCompanyFilter} defaultValue="all">
+            <Select onValueChange={(value) => setCompanyFilter(value === 'all' ? '' : value)} defaultValue="">
               <SelectTrigger><SelectValue placeholder="All Companies" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Companies</SelectItem>
                 {companies.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select onValueChange={setTypeFilter} defaultValue="all">
-              <SelectTrigger><SelectValue placeholder="All Types" /></SelectTrigger>
+            <Select onValueChange={(value) => setRoleFilter(value === 'all' ? '' : value)} defaultValue="">
+              <SelectTrigger><SelectValue placeholder="All Roles" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                {types.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                <SelectItem value="all">All Roles</SelectItem>
+                {roles.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
               </SelectContent>
             </Select>
           </CardContent>
@@ -179,19 +178,21 @@ const PlacementStats = () => {
         </div>
 
         {/* Charts */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
+        <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2 mb-12">
           <Card className="lg:col-span-1">
             <CardHeader><CardTitle className="text-center">Year-wise Offers</CardTitle></CardHeader>
-            <CardContent><Bar data={yearData} /></CardContent>
+            <CardContent><Bar data={yearData} options={{ responsive: true }} /></CardContent>
           </Card>
           <Card className="lg:col-span-1">
             <CardHeader><CardTitle className="text-center">Branch-wise Distribution</CardTitle></CardHeader>
-            <CardContent><Pie data={branchData} /></CardContent>
+            <CardContent className="max-h-80 flex justify-center"><Pie data={branchData} options={{ responsive: true, maintainAspectRatio: false }} /></CardContent>
           </Card>
-          <Card className="lg:col-span-1">
-            <CardHeader><CardTitle className="text-center">Company Type</CardTitle></CardHeader>
-            <CardContent><Doughnut data={typeData} /></CardContent>
-          </Card>
+        </div>
+        <div className="mb-12">
+            <Card>
+                <CardHeader><CardTitle className="text-center">Top 10 Job Roles</CardTitle></CardHeader>
+                <CardContent><Bar data={roleData} options={{ responsive: true, indexAxis: 'y' }} /></CardContent>
+            </Card>
         </div>
 
         {/* Offer Details */}
@@ -209,8 +210,8 @@ const PlacementStats = () => {
                       <TableHead>Company</TableHead>
                       <TableHead>Role</TableHead>
                       <TableHead>Branch</TableHead>
+                      <TableHead>Year</TableHead>
                       <TableHead>CTC (LPA)</TableHead>
-                      <TableHead>Type</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -221,11 +222,11 @@ const PlacementStats = () => {
                     ) : (
                       filtered.map((offer, index) => (
                         <TableRow key={index}>
-                          <TableCell>{offer.company}</TableCell>
-                          <TableCell>{offer.role || '—'}</TableCell>
+                          <TableCell>{offer.companyName}</TableCell>
+                          <TableCell>{offer.role}</TableCell>
                           <TableCell>{offer.branch}</TableCell>
+                          <TableCell>{offer.year}</TableCell>
                           <TableCell>₹{offer.package}</TableCell>
-                          <TableCell>{offer.type}</TableCell>
                         </TableRow>
                       ))
                     )}

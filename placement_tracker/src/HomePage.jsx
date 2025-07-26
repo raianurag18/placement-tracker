@@ -35,36 +35,11 @@ const HomePage = ({ user }) => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Navbar */}
-      <nav className="bg-card border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/" className="font-bold text-2xl">Placement Tracker</Link>
-            </div>
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
-                <Link to="/"><Button variant="ghost">Home</Button></Link>
-                <Link to="/stats"><Button variant="ghost">Stats</Button></Link>
-                <Link to="/submit"><Button variant="ghost">Submit Experience</Button></Link>
-                <Link to="/about"><Button variant="ghost">About</Button></Link>
-                {user ? (
-                  <a href="http://localhost:5000/auth/logout"><Button>Logout</Button></a>
-                ) : (
-                  <a href="http://localhost:5000/auth/google"><Button>Login with Google</Button></a>
-                )}
-                <Link to="/admin"><Button>Admin Login</Button></Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <header className="bg-card border-b">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">
-            Welcome to the Placement Tracker
+            Welcome to the Placerra
           </h1>
           <p className="mt-4 max-w-2xl mx-auto text-xl text-muted-foreground">
             Your one-stop destination for placement statistics and interview experiences.
