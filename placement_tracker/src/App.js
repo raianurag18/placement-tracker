@@ -17,14 +17,26 @@ import { useEffect, useState } from "react";
 import MainLayout from './components/MainLayout';
 
 function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(undefined);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/current_user", { credentials: 'include' })
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        return null;
+      })
       .then((data) => setUser(data))
-      .catch((err) => console.error("Error fetching user:", err));
+      .catch((err) => {
+        console.error("Error fetching user:", err)
+        setUser(null);
+      });
   }, []);
+
+  if (user === undefined) {
+    return <div>Loading...</div>
+  }
 
   return (
     <Routes>

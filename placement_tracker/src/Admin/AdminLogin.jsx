@@ -11,6 +11,7 @@ import {
 } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { Link } from 'react-router-dom';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -52,6 +53,13 @@ const AdminLogin = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
+      <div className="absolute top-4 left-4">
+        <Button asChild variant="link">
+          <Link to="/">
+            ← Back to Home
+          </Link>
+        </Button>
+      </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">Admin Login</CardTitle>

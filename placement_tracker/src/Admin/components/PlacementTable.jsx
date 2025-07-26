@@ -8,6 +8,8 @@ import {
   TableRow,
 } from "../../components/ui/table";
 import { Button } from "../../components/ui/button";
+import AddPlacementForm from './AddPlacementForm';
+import EditPlacementForm from './EditPlacementForm';
 
 const PlacementTable = () => {
   const [placements, setPlacements] = useState([]);
@@ -19,10 +21,42 @@ const PlacementTable = () => {
       .catch((err) => console.error('Error fetching placements:', err));
   }, []);
 
+  const handleRecordAdded = (newRecord) => {
+    setPlacements((prevPlacements) => [newRecord, ...prevPlacements]);
+  };
+
+  const handleRecordUpdated = (updatedRecord) => {
+    setPlacements((prevPlacements) =>
+      prevPlacements.map((p) =>
+        p._id === updatedRecord._id ? updatedRecord : p
+      )
+    );
+  };
+
+  const handleDelete = async (id) => {
+    const confirm = window.confirm("Are you sure you want to delete this record?");
+    if (!confirm) return;
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/placements/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        setPlacements((prev) => prev.filter((p) => p._id !== id));
+      } else {
+        alert('Failed to delete the record.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Server error while deleting.');
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <Button>Add New Record</Button>
+        <AddPlacementForm onRecordAdded={handleRecordAdded} />
       </div>
       <Table>
         <TableHeader>
@@ -42,8 +76,8 @@ const PlacementTable = () => {
               <TableCell>{p.studentName}</TableCell>
               <TableCell>{p.package}</TableCell>
               <TableCell>
-                <Button variant="outline" size="sm" className="mr-2">Edit</Button>
-                <Button variant="destructive" size="sm">Delete</Button>
+                <EditPlacementForm record={p} onRecordUpdated={handleRecordUpdated} />
+                <Button variant="destructive" size="sm" onClick={() => handleDelete(p._id)}>Delete</Button>
               </TableCell>
             </TableRow>
           ))}

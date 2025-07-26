@@ -91,4 +91,42 @@ router.get('/all', async (req, res) => {
   }
 });
 
+// Add a new placement record
+router.post('/', async (req, res) => {
+  const placement = new Placement({
+    ...req.body,
+  });
+
+  try {
+    const newPlacement = await placement.save();
+    res.status(201).json(newPlacement);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Update a placement record
+router.patch('/:id', async (req, res) => {
+  try {
+    const updatedPlacement = await Placement.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    res.json(updatedPlacement);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Delete a placement record
+router.delete('/:id', async (req, res) => {
+  try {
+    await Placement.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Placement record deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
