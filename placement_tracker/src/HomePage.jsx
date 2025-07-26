@@ -56,7 +56,7 @@ const HomePage = ({ user }) => {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {displayStats.map((stat, index) => (
               <Link to={stat.link || '#'} key={index}>
-                <Card>
+                <Card className="transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
                     {stat.icon}
