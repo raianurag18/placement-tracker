@@ -1,11 +1,12 @@
 require('dotenv').config();
 const express = require('express');
-const passport = require('passport');
-const session = require('express-session');
 const mongoose = require('mongoose');
+const session = require('express-session');
+const passport = require('passport');
 const cors = require('cors');
 const Admin = require('./models/Admin');
 const User = require('./models/User');
+const Experience = require('./models/Experience');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 require('./config/passport');
@@ -127,21 +128,6 @@ if (!existingAdmin) {
     console.error('❌ Error creating dummy admin:', err);
   }
 };
-
-// Schema and Model
-const experienceSchema = new mongoose.Schema({
-  name: String,
-  company: String,
-  role: String,
-  package: String,
-  experience: String,
-  approved: {
-    type: Boolean,
-    default: false,
-  }
-});
-
-const Experience = mongoose.model('Experience', experienceSchema);
 
 // POST route
 app.post('/api/experience', async (req, res) => {

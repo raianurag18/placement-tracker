@@ -1,81 +1,81 @@
 [
   {
-    "studentName": "Aarav Sharma",
-    "companyName": "Google",
+    "name": "Aarav Sharma",
+    "company": "Google",
     "role": "Software Engineer",
-    "package": 25,
+    "package": "25 LPA",
     "year": 2023,
     "experience": "The interview process was challenging but rewarding. Focused on data structures and algorithms."
   },
   {
-    "studentName": "Diya Patel",
-    "companyName": "Microsoft",
+    "name": "Diya Patel",
+    "company": "Microsoft",
     "role": "Product Manager",
-    "package": 22,
+    "package": "22 LPA",
     "year": 2023,
     "experience": "Great experience, the case studies were very insightful. The culture seems amazing."
   },
   {
-    "studentName": "Rohan Kumar",
-    "companyName": "Amazon",
+    "name": "Rohan Kumar",
+    "company": "Amazon",
     "role": "Data Scientist",
-    "package": 20,
+    "package": "20 LPA",
     "year": 2023,
     "experience": "The technical rounds were in-depth. Be prepared for questions on machine learning concepts."
   },
   {
-    "studentName": "Priya Singh",
-    "companyName": "Flipkart",
+    "name": "Priya Singh",
+    "company": "Flipkart",
     "role": "Software Development Engineer",
-    "package": 18,
+    "package": "18 LPA",
     "year": 2023,
     "experience": "The hiring process was smooth. The bar is high, but the team is very supportive."
   },
   {
-    "studentName": "Aditya Verma",
-    "companyName": "Adobe",
+    "name": "Aditya Verma",
+    "company": "Adobe",
     "role": "UI/UX Designer",
-    "package": 19,
+    "package": "19 LPA",
     "year": 2023,
     "experience": "Portfolio review was the most important part. They look for creativity and a strong design sense."
   },
   {
-    "studentName": "Ananya Gupta",
-    "companyName": "Oracle",
+    "name": "Ananya Gupta",
+    "company": "Oracle",
     "role": "Database Administrator",
-    "package": 17,
+    "package": "17 LPA",
     "year": 2022,
     "experience": "Strong knowledge of SQL and database design is a must. The technical interview was very practical."
   },
   {
-    "studentName": "Vikram Rathore",
-    "companyName": "Salesforce",
+    "name": "Vikram Rathore",
+    "company": "Salesforce",
     "role": "Cloud Engineer",
-    "package": 21,
+    "package": "21 LPA",
     "year": 2022,
     "experience": "Experience with cloud platforms like AWS or Azure is crucial. The interview process was very hands-on."
   },
   {
-    "studentName": "Isha Sharma",
-    "companyName": "Zomato",
+    "name": "Isha Sharma",
+    "company": "Zomato",
     "role": "Marketing Analyst",
-    "package": 15,
+    "package": "15 LPA",
     "year": 2022,
     "experience": "They value a data-driven approach to marketing. The case study was based on real-world scenarios."
   },
   {
-    "studentName": "Kabir Khan",
-    "companyName": "Swiggy",
+    "name": "Kabir Khan",
+    "company": "Swiggy",
     "role": "Operations Manager",
-    "package": 16,
+    "package": "16 LPA",
     "year": 2022,
     "experience": "Problem-solving and analytical skills are key. The interview process tests your ability to handle pressure."
   },
   {
-    "studentName": "Sneha Reddy",
-    "companyName": "Paytm",
+    "name": "Sneha Reddy",
+    "company": "Paytm",
     "role": "Financial Analyst",
-    "package": 14,
+    "package": "14 LPA",
     "year": 2022,
     "experience": "A good understanding of financial modeling and valuation is required. The technical rounds were intense."
   }

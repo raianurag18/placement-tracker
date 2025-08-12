@@ -2,6 +2,8 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './HomePage';
 import SubmitExperience from './Experience/SubmitExperience';
+import ExperiencesPage from './Experience/ExperiencesPage';
+import AboutPage from './AboutPage';
 import AdminLogin from './Admin/AdminLogin';
 import AdminDashboard from './Admin/AdminDashboard';
 import PlacementStats from './Stats/PlacementStats';
@@ -15,6 +17,9 @@ import LoginFailurePage from './Auth/LoginFailurePage';
 import PrivateRoute from './PrivateRoute';
 import { useEffect, useState } from "react";
 import MainLayout from './components/MainLayout';
+import AdminLayout from './Admin/components/AdminLayout';
+import AdminPlacementRecords from './Admin/components/AdminPlacementRecords';
+import AdminExperienceModeration from './Admin/components/AdminExperienceModeration';
 
 function App() {
   const [user, setUser] = useState(undefined);
@@ -43,6 +48,8 @@ function App() {
       {/* Routes with Main Layout (Header and Footer) */}
       <Route element={<MainLayout user={user} />}>
         <Route path="/" element={<HomePage user={user} />} />
+        <Route path="/experiences" element={<ExperiencesPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/submit" element={<PrivateRoute user={user}><SubmitExperience /></PrivateRoute>} />
         <Route path="/stats" element={<PrivateRoute user={user}><PlacementStats /></PrivateRoute>} />
         <Route path="/companies" element={<PrivateRoute user={user}><CompaniesPage /></PrivateRoute>} />
@@ -52,9 +59,15 @@ function App() {
         <Route path="/highest-package-branch" element={<PrivateRoute user={user}><HighestPackageBranchPage /></PrivateRoute>} />
       </Route>
 
+      {/* Admin Routes */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="placements" element={<AdminPlacementRecords />} />
+        <Route path="experiences" element={<AdminExperienceModeration />} />
+      </Route>
+
       {/* Routes without Main Layout */}
       <Route path="/admin" element={<AdminLogin />} />
-      <Route path="/admin/dashboard" element={<AdminDashboard />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/login-failure" element={<LoginFailurePage />} />
     </Routes>

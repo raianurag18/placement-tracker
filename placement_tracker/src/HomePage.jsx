@@ -51,7 +51,7 @@ const HomePage = ({ user }) => {
         {/* Placement Stats Section */}
         <section className="mb-12">
           <h2 className="text-3xl font-extrabold text-center mb-8">
-            Placement Overview - 2024
+            Placement Overview - 2025
           </h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {displayStats.map((stat, index) => (
@@ -73,13 +73,13 @@ const HomePage = ({ user }) => {
         {/* Interview Experiences Section */}
         <section className="mb-12">
           <h2 className="text-3xl font-extrabold text-center mb-8">
-            Interview Experiences
+            Recent Interview Experiences
           </h2>
           {experiences.length === 0 ? (
             <p className="text-center text-muted-foreground">No experiences submitted yet.</p>
           ) : (
             <div className="grid gap-8 lg:grid-cols-2">
-              {experiences.map((exp) => (
+              {experiences.slice(0, 2).map((exp) => (
                 <Card key={exp._id}>
                   <CardHeader>
                     <CardTitle>{exp.company} - <span className="font-semibold">{exp.role}</span></CardTitle>
@@ -94,6 +94,11 @@ const HomePage = ({ user }) => {
               ))}
             </div>
           )}
+          <div className="text-center mt-8">
+            <Link to="/experiences">
+              <Button>View All Experiences</Button>
+            </Link>
+          </div>
         </section>
 
         {/* Student Reviews Section */}
@@ -141,50 +146,6 @@ const HomePage = ({ user }) => {
             </div>
           </div>
         </section>
-        {user && (
-          <section className="mb-12">
-            <h2 className="text-3xl font-extrabold text-center mb-8">
-              Student Zone
-            </h2>
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <User className="mr-2" /> My Profile
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>View and update your profile information.</p>
-                  <Button className="mt-4">Go to Profile</Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <FileText className="mr-2" /> My Experiences
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>See the interview experiences you've submitted.</p>
-                  <Button className="mt-4">View My Submissions</Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BarChart className="mr-2" /> Placement Stats
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>Explore detailed placement statistics.</p>
-                  <Link to="/stats"><Button className="mt-4">Explore Stats</Button></Link>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-        )}
       </main>
     </div>
   );

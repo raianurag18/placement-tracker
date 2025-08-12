@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
 const ExperienceSchema = new mongoose.Schema({
-  studentName: {
+  name: {
     type: String,
     required: true,
   },
-  companyName: {
+  company: {
     type: String,
     required: true,
   },
@@ -14,16 +14,16 @@ const ExperienceSchema = new mongoose.Schema({
     required: true,
   },
   package: {
-    type: Number,
-    required: true,
-  },
-  year: {
-    type: Number,
+    type: String, // Keeping as String to match form input like "12 LPA"
     required: true,
   },
   experience: {
     type: String,
     required: true,
+  },
+  approved: {
+    type: Boolean,
+    default: false,
   },
 });
 

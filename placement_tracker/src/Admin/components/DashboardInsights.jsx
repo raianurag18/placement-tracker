@@ -5,9 +5,6 @@ import PlacementInsights from './PlacementInsights';
 const DashboardInsights = () => {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Dashboard Insights</CardTitle>
-      </CardHeader>
       <CardContent>
         <PlacementInsights />
       </CardContent>

@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const Placement = require('./models/Placement');
+const Experience = require('./models/Experience');
 const placements = require('./data/placements.json');
+const experiences = require('./data/experiences.json');
 require('dotenv').config({ path: './backend/.env' });
 
 const seedDB = async () => {
@@ -10,8 +12,8 @@ const seedDB = async () => {
       useUnifiedTopology: true,
     });
 
-    await Placement.deleteMany({});
-    await Placement.insertMany(placements);
+    await Experience.deleteMany({});
+    await Experience.insertMany(experiences);
 
     console.log('Database seeded successfully');
     mongoose.connection.close();
