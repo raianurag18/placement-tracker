@@ -21,6 +21,14 @@ const PlacementSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+  institute: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Institute'
+  }
 });
 
 module.exports = mongoose.model('Placement', PlacementSchema);

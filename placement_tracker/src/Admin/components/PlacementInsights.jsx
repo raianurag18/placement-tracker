@@ -9,7 +9,7 @@ const PlacementInsights = () => {
   const [placements, setPlacements] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/placements/all')
+    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements/all`)
       .then((res) => res.json())
       .then((data) => setPlacements(data))
       .catch((err) => console.error('Error fetching placements:', err));
@@ -46,44 +46,44 @@ const PlacementInsights = () => {
   const roleData = useMemo(() => {
     const data = {};
     placements.forEach(offer => {
-        data[offer.role] = (data[offer.role] || 0) + 1;
+      data[offer.role] = (data[offer.role] || 0) + 1;
     });
-    const sortedRoles = Object.entries(data).sort(([,a],[,b]) => b-a).slice(0, 5);
+    const sortedRoles = Object.entries(data).sort(([, a], [, b]) => b - a).slice(0, 5);
     return {
-        labels: sortedRoles.map(([label]) => label),
-        datasets: [{
-            label: 'Top 5 Roles',
-            data: sortedRoles.map(([,value]) => value),
-            backgroundColor: 'rgba(255, 99, 132, 0.6)',
-        }],
+      labels: sortedRoles.map(([label]) => label),
+      datasets: [{
+        label: 'Top 5 Roles',
+        data: sortedRoles.map(([, value]) => value),
+        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+      }],
     };
   }, [placements]);
 
   return (
     <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 mt-4">
-      <Card>
-        <CardHeader><CardTitle>Total Offers</CardTitle></CardHeader>
-        <CardContent><p className="text-2xl font-bold">{stats.total}</p></CardContent>
+      <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white">
+        <CardHeader><CardTitle className="text-gray-200">Total Offers</CardTitle></CardHeader>
+        <CardContent><p className="text-2xl font-bold text-white">{stats.total}</p></CardContent>
       </Card>
-      <Card>
-        <CardHeader><CardTitle>Highest Package</CardTitle></CardHeader>
-        <CardContent><p className="text-2xl font-bold">₹{stats.highest} LPA</p></CardContent>
+      <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white">
+        <CardHeader><CardTitle className="text-gray-200">Highest Package</CardTitle></CardHeader>
+        <CardContent><p className="text-2xl font-bold text-white">₹{stats.highest} LPA</p></CardContent>
       </Card>
-      <Card>
-        <CardHeader><CardTitle>Average Package</CardTitle></CardHeader>
-        <CardContent><p className="text-2xl font-bold">₹{stats.average} LPA</p></CardContent>
+      <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white">
+        <CardHeader><CardTitle className="text-gray-200">Average Package</CardTitle></CardHeader>
+        <CardContent><p className="text-2xl font-bold text-white">₹{stats.average} LPA</p></CardContent>
       </Card>
-      <Card>
-        <CardHeader><CardTitle>Median Package</CardTitle></CardHeader>
-        <CardContent><p className="text-2xl font-bold">₹{stats.median} LPA</p></CardContent>
+      <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white">
+        <CardHeader><CardTitle className="text-gray-200">Median Package</CardTitle></CardHeader>
+        <CardContent><p className="text-2xl font-bold text-white">₹{stats.median} LPA</p></CardContent>
       </Card>
-      <Card className="col-span-1 sm:col-span-2">
-        <CardHeader><CardTitle className="text-center">Branch-wise Distribution</CardTitle></CardHeader>
-        <CardContent className="h-64 flex justify-center"><Pie data={branchData} options={{ responsive: true, maintainAspectRatio: false }} /></CardContent>
+      <Card className="col-span-1 sm:col-span-2 bg-white/10 backdrop-blur-md border-white/10 text-white">
+        <CardHeader><CardTitle className="text-center text-gray-200">Branch-wise Distribution</CardTitle></CardHeader>
+        <CardContent className="h-64 flex justify-center"><Pie data={branchData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: 'white' } } } }} /></CardContent>
       </Card>
-      <Card className="col-span-1 sm:col-span-2">
-        <CardHeader><CardTitle className="text-center">Top 5 Job Roles</CardTitle></CardHeader>
-        <CardContent><Bar data={roleData} options={{ responsive: true }} /></CardContent>
+      <Card className="col-span-1 sm:col-span-2 bg-white/10 backdrop-blur-md border-white/10 text-white">
+        <CardHeader><CardTitle className="text-center text-gray-200">Top 5 Job Roles</CardTitle></CardHeader>
+        <CardContent><Bar data={roleData} options={{ responsive: true, plugins: { legend: { labels: { color: 'white' } } }, scales: { x: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }, y: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } } } }} /></CardContent>
       </Card>
     </div>
   );

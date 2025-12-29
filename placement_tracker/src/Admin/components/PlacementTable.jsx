@@ -15,7 +15,7 @@ const PlacementTable = () => {
   const [placements, setPlacements] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/placements/all')
+    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements/all`)
       .then((res) => res.json())
       .then((data) => setPlacements(data))
       .catch((err) => console.error('Error fetching placements:', err));
@@ -38,8 +38,12 @@ const PlacementTable = () => {
     if (!confirm) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/placements/${id}`, {
+      const token = localStorage.getItem('admin_token');
+      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (res.ok) {
@@ -55,34 +59,39 @@ const PlacementTable = () => {
 
   return (
     <div>
+      <h2 className="text-3xl font-bold mb-6">Placement Records</h2>
       <div className="flex justify-end mb-4">
         <AddPlacementForm onRecordAdded={handleRecordAdded} />
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Company</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Student</TableHead>
-            <TableHead>CTC (LPA)</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {placements.map((p) => (
-            <TableRow key={p._id}>
-              <TableCell>{p.companyName}</TableCell>
-              <TableCell>{p.role}</TableCell>
-              <TableCell>{p.studentName}</TableCell>
-              <TableCell>{p.package}</TableCell>
-              <TableCell>
-                <EditPlacementForm record={p} onRecordUpdated={handleRecordUpdated} />
-                <Button variant="destructive" size="sm" onClick={() => handleDelete(p._id)}>Delete</Button>
-              </TableCell>
+      <div className="rounded-md border border-white/10 overflow-hidden bg-white/5 backdrop-blur-md">
+        <Table>
+          <TableHeader className="bg-white/5">
+            <TableRow className="hover:bg-transparent border-white/10">
+              <TableHead className="text-gray-300">Company</TableHead>
+              <TableHead className="text-gray-300">Role</TableHead>
+              <TableHead className="text-gray-300">Student</TableHead>
+              <TableHead className="text-gray-300">CTC (LPA)</TableHead>
+              <TableHead className="text-gray-300">Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {placements.map((p) => (
+              <TableRow key={p._id} className="hover:bg-white/5 border-white/5">
+                <TableCell className="text-gray-200">{p.companyName}</TableCell>
+                <TableCell className="text-gray-200">{p.role}</TableCell>
+                <TableCell className="text-gray-200">{p.studentName}</TableCell>
+                <TableCell className="text-gray-200">{p.package}</TableCell>
+                <TableCell>
+                  <div className="flex space-x-2">
+                    <EditPlacementForm record={p} onRecordUpdated={handleRecordUpdated} />
+                    <Button variant="destructive" size="sm" onClick={() => handleDelete(p._id)}>Delete</Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };

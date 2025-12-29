@@ -33,7 +33,7 @@ const SubmitExperience = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/experience', {
+      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/experience`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ const SubmitExperience = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground py-12 px-4">
+    <div className="min-h-screen py-12 px-4">
       <div className="max-w-3xl mx-auto">
         <Button asChild variant="link" className="mb-6">
           <Link to="/">
@@ -75,16 +75,16 @@ const SubmitExperience = () => {
           </Link>
         </Button>
 
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-md border border-white/10 text-white shadow-2xl">
           <CardHeader>
-            <CardTitle className="text-2xl">Submit Your Interview Experience</CardTitle>
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Submit Your Interview Experience</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {success && <p className="text-green-600 text-center">{success}</p>}
-              {error && <p className="text-red-600 text-center">{error}</p>}
+              {success && <div className="p-3 bg-green-500/20 border border-green-500 rounded text-green-300 text-center">{success}</div>}
+              {error && <div className="p-3 bg-red-500/20 border border-red-500 rounded text-red-300 text-center">{error}</div>}
               <div className="grid gap-2">
-                <Label htmlFor="name">Your Name</Label>
+                <Label htmlFor="name" className="text-gray-300">Your Name</Label>
                 <Input
                   id="name"
                   name="name"
@@ -92,10 +92,11 @@ const SubmitExperience = () => {
                   placeholder="Your Name"
                   value={formData.name}
                   onChange={handleChange}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500/20"
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="company">Company</Label>
+                <Label htmlFor="company" className="text-gray-300">Company</Label>
                 <Input
                   id="company"
                   name="company"
@@ -103,11 +104,12 @@ const SubmitExperience = () => {
                   placeholder="Company"
                   value={formData.company}
                   onChange={handleChange}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500/20"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="role">Role</Label>
+                  <Label htmlFor="role" className="text-gray-300">Role</Label>
                   <Input
                     id="role"
                     name="role"
@@ -115,10 +117,11 @@ const SubmitExperience = () => {
                     placeholder="Role"
                     value={formData.role}
                     onChange={handleChange}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500/20"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="package">Package</Label>
+                  <Label htmlFor="package" className="text-gray-300">Package</Label>
                   <Input
                     id="package"
                     name="package"
@@ -126,11 +129,12 @@ const SubmitExperience = () => {
                     placeholder="e.g., 12 LPA"
                     value={formData.package}
                     onChange={handleChange}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500/20"
                   />
                 </div>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="experience">Your Experience</Label>
+                <Label htmlFor="experience" className="text-gray-300">Your Experience</Label>
                 <Textarea
                   id="experience"
                   name="experience"
@@ -138,9 +142,10 @@ const SubmitExperience = () => {
                   placeholder="Write your experience..."
                   value={formData.experience}
                   onChange={handleChange}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500/20"
                 />
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0">
                 Submit
               </Button>
             </form>

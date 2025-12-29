@@ -1,213 +1,50 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const session = require('express-session');
-const passport = require('passport');
 const cors = require('cors');
-const Admin = require('./models/Admin');
-const User = require('./models/User');
-const Experience = require('./models/Experience');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const createDummyAdmin = require('./utils/adminSeeder');
 
-require('./config/passport');
-
+// Routes
 const authRoutes = require('./routes/auth');
-const placementRoutes = require('./routes/placements.js');
+const placementRoutes = require('./routes/placements');
+const experienceRoutes = require('./routes/experiences');
+const adminRoutes = require('./routes/admin');
+const instituteRoutes = require('./routes/institutes');
+const profileRoutes = require('./routes/profile');
+const path = require('path');
 
 const app = express();
+
+// Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001'],
+  origin: ['http://localhost:3000', 'http://localhost:3001', process.env.CLIENT_URL], // Add Client URL from env
   credentials: true,
 }));
 app.use(express.json());
-
-app.use(session({
-  secret: 'your-secret',
-  resave: false,
-  saveUninitialized: false
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
+// Serve static files (Uploaded Resumes)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI, {
-})
-.then(() => {
-  console.log('✅ MongoDB connected');
-})
-.catch((err) => console.error('❌ MongoDB connection error:', err));
-
-// Google OAuth Strategy
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "http://localhost:5000/auth/google/callback",
-},
-async (accessToken, refreshToken, profile, done) => {
-  const email = profile.emails[0].value;
-  if (!email.endsWith('@bitmesra.ac.in')) {
-    return done(null, false, { message: 'Please use your college mail' });
-  }
-
-  const newUser = {
-    googleId: profile.id,
-    name: profile.displayName,
-    email: email,
-  };
-
-  try {
-    let user = await User.findOne({ googleId: profile.id });
-
-    if (user) {
-      done(null, user);
-    } else {
-      user = await User.create(newUser);
-      done(null, user);
-    }
-  } catch (err) {
-    console.error(err);
-  }
-}));
-
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
-passport.deserializeUser((user, done) => {
-  done(null, user);
-});
-
-// Routes
-app.use('/api/placements', placementRoutes);
-
-app.get('/auth/google', (req, res, next) => {
-  console.log('🔄 /auth/google route hit');
-  next();
-}, passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-
-app.get('/auth/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: 'http://localhost:3000/login-failure',
-    successRedirect: 'http://localhost:3000/', // or your frontend dashboard
+mongoose.connect(process.env.MONGO_URI, {})
+  .then(() => {
+    console.log('✅ MongoDB connected');
+    createDummyAdmin();
   })
-);
+  .catch((err) => console.error('❌ MongoDB connection error:', err));
 
-app.get('/login-failure', (req, res) => {
-  res.send('Login Failed');
-});
-
-app.get('/api/current_user', (req, res) => {
-  res.send(req.user);
-});
-
-app.get('/auth/logout', (req, res, next) => {
-  req.logout(function(err) {
-    if (err) { return next(err); }
-    res.redirect('http://localhost:3000');
-  });
-});
-
-
-// ✅ Define createDummyAdmin function here, just after the connection block
-const createDummyAdmin = async () => {
-  try {
-    const existingAdmin = await Admin.findOne({ email: 'admin@college.com' });
-
-if (!existingAdmin) {
-  const newAdmin = new Admin({
-    email: 'admin@college.com',
-    password: 'admin123',
-    role: 'admin',
-  });
-
-  await newAdmin.save();
-  console.log('🟢 Dummy admin created');
-}
-  } catch (err) {
-    console.error('❌ Error creating dummy admin:', err);
-  }
-};
-
-// POST route
-app.post('/api/experience', async (req, res) => {
-  try {
-    const newExperience = new Experience({ ...req.body, approved: false });
-    await newExperience.save();
-    res.status(201).json({ message: 'Experience submitted successfully!' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Failed to submit experience' });
-  }
-});
-
-
-// ✅ 👇 Add THIS GET Route after the POST route
-app.get("/api/experiences", async (req, res) => {
-  try {
-    const experiences = await Experience.find({ approved: true }).sort({ _id: -1 }); // newest first
-    res.json(experiences);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Admin login route
-app.post('/api/admin/login',async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const admin = await Admin.findOne({ email });
-
-    if (!admin || admin.password !== password) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
-    }
-
-    res.json({ success: true, message: 'Admin login successful' });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-// DELETE experience by ID
-app.delete('/api/experience/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Experience.findByIdAndDelete(id);
-    res.json({ message: 'Experience deleted successfully' });
-  } catch (err) {
-    console.error('Error deleting experience:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-//Pending request for admin
-app.get('/api/admin/pending-experiences', async (req, res) => {
-  try {
-    const pending = await Experience.find({ approved: false }).sort({ _id: -1 });
-    res.json(pending);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-//Allow admin to approve
-app.patch('/api/admin/approve/:id', async (req, res) => {
- try {
-    const updated = await Experience.findByIdAndUpdate(
-      req.params.id,
-      { approved: true },
-      { new: true }
-    );
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ message: 'Approval failed' });
-  }
-});
-
+// Routes Configuration
+app.use('/api/placements', placementRoutes);
+app.use('/auth', authRoutes);
+app.use('/api/experiences', experienceRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/institutes', instituteRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/jobs', require('./routes/jobs'));
+app.use('/api/applications', require('./routes/applications'));
+app.use('/api/resume', require('./routes/resume'));
 
 // Start server
-app.listen(5000, () => {
-  console.log('🚀 Server is running on http://localhost:5000');
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });

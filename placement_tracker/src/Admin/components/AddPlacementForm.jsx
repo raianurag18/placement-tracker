@@ -29,10 +29,12 @@ const AddPlacementForm = ({ onRecordAdded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:5000/api/placements', {
+      const token = localStorage.getItem('admin_token');
+      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(formData),
       });

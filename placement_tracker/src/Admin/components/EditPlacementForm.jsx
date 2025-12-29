@@ -26,10 +26,12 @@ const EditPlacementForm = ({ record, onRecordUpdated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:5000/api/placements/${record._id}`, {
+      const token = localStorage.getItem('admin_token');
+      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements/${record._id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(formData),
       });
@@ -50,7 +52,7 @@ const EditPlacementForm = ({ record, onRecordUpdated }) => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="mr-2">Edit</Button>
+        <Button size="sm" className="mr-2 bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-md">Edit</Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>

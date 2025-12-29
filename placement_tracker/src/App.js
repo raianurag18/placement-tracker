@@ -1,9 +1,10 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import HomePage from './HomePage';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import StudentDashboard from './pages/StudentDashboard';
+import LandingPage from './pages/LandingPage';
 import SubmitExperience from './Experience/SubmitExperience';
 import ExperiencesPage from './Experience/ExperiencesPage';
-import AboutPage from './AboutPage';
+import AboutPage from './pages/AboutPage';
 import AdminLogin from './Admin/AdminLogin';
 import AdminDashboard from './Admin/AdminDashboard';
 import PlacementStats from './Stats/PlacementStats';
@@ -14,44 +15,49 @@ import BranchPlacementsPage from './Stats/BranchPlacementsPage';
 import HighestPackageBranchPage from './Stats/HighestPackageBranchPage';
 import LoginPage from './Auth/LoginPage';
 import LoginFailurePage from './Auth/LoginFailurePage';
-import PrivateRoute from './PrivateRoute';
-import { useEffect, useState } from "react";
+import GetStartedPage from './Auth/GetStartedPage';
+import ProfilePage from './pages/ProfilePage'; // Added import
+import ResumeBuilder from './pages/ResumeBuilder';
+import JobsPage from './pages/JobsPage';
+import MyApplications from './pages/MyApplications';
+import PrivateRoute from './components/PrivateRoute';
 import MainLayout from './components/MainLayout';
 import AdminLayout from './Admin/components/AdminLayout';
-import AdminPlacementRecords from './Admin/components/AdminPlacementRecords';
-import AdminExperienceModeration from './Admin/components/AdminExperienceModeration';
+import { useAuth } from './context/AuthContext';
+import PlacementTable from './Admin/components/PlacementTable';
+import ExperienceModeration from './Admin/components/ExperienceModeration';
+import AdminPrivateRoute from './Admin/AdminPrivateRoute';
 
 function App() {
-  const [user, setUser] = useState(undefined);
+  const { user, isLoading } = useAuth();
+  const location = useLocation();
 
-  useEffect(() => {
-    fetch("http://localhost:5000/api/current_user", { credentials: 'include' })
-      .then((res) => {
-        if (res.ok) {
-          return res.json();
-        }
-        return null;
-      })
-      .then((data) => setUser(data))
-      .catch((err) => {
-        console.error("Error fetching user:", err)
-        setUser(null);
-      });
-  }, []);
-
-  if (user === undefined) {
-    return <div>Loading...</div>
+  // Allow Admin routes to bypass global loading check (they use their own Auth)
+  if (isLoading && !location.pathname.startsWith('/admin')) {
+    return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading...</div>;
   }
 
   return (
     <Routes>
+      {/* Public Landing Page (No Layout) - Only visible if user is NOT logged in */}
+      {!user && <Route path="/" element={<LandingPage />} />}
+      <Route path="/get-started" element={<GetStartedPage />} />
+
       {/* Routes with Main Layout (Header and Footer) */}
       <Route element={<MainLayout user={user} />}>
-        <Route path="/" element={<HomePage user={user} />} />
+        {/* If user is logged in, / shows the Dashboard inside the layout */}
+        {user && <Route path="/" element={<StudentDashboard user={user} />} />}
+
+        {/* Explicit dashboard route if needed, or redirect from landing if logged in (optional, keeping clean) */}
+
         <Route path="/experiences" element={<ExperiencesPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/submit" element={<PrivateRoute user={user}><SubmitExperience /></PrivateRoute>} />
-        <Route path="/stats" element={<PrivateRoute user={user}><PlacementStats /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute user={user}><ProfilePage /></PrivateRoute>} />
+        <Route path="/resume" element={<PrivateRoute user={user}><ResumeBuilder /></PrivateRoute>} />
+        <Route path="/jobs" element={<PrivateRoute><JobsPage /></PrivateRoute>} />
+        <Route path="/my-applications" element={<PrivateRoute><MyApplications /></PrivateRoute>} />
+        <Route path="/stats" element={<PrivateRoute><PlacementStats /></PrivateRoute>} />
         <Route path="/companies" element={<PrivateRoute user={user}><CompaniesPage /></PrivateRoute>} />
         <Route path="/companies/:companyName" element={<PrivateRoute user={user}><CompanyPlacementsPage /></PrivateRoute>} />
         <Route path="/branch-stats" element={<PrivateRoute user={user}><BranchStatsPage /></PrivateRoute>} />
@@ -60,14 +66,22 @@ function App() {
       </Route>
 
       {/* Admin Routes */}
-      <Route path="/admin" element={<AdminLayout />}>
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route
+        path="/admin"
+        element={
+          <AdminPrivateRoute>
+            <AdminLayout />
+          </AdminPrivateRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="placements" element={<AdminPlacementRecords />} />
-        <Route path="experiences" element={<AdminExperienceModeration />} />
+        <Route path="placements" element={<PlacementTable />} />
+        <Route path="experiences" element={<ExperienceModeration />} />
       </Route>
 
       {/* Routes without Main Layout */}
-      <Route path="/admin" element={<AdminLogin />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/login-failure" element={<LoginFailurePage />} />
     </Routes>

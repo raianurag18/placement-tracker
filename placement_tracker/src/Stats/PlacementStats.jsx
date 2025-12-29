@@ -18,7 +18,7 @@ const PlacementStats = () => {
   const [showOffers, setShowOffers] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/placements/all')
+    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements/all`)
       .then((res) => res.json())
       .then((data) => setPlacements(data))
       .catch((err) => console.error('Error fetching placements:', err));
@@ -93,65 +93,65 @@ const PlacementStats = () => {
       }],
     };
   }, [filtered]);
-  
+
   const roleData = useMemo(() => {
     const data = {};
     filtered.forEach(offer => {
-        data[offer.role] = (data[offer.role] || 0) + 1;
+      data[offer.role] = (data[offer.role] || 0) + 1;
     });
-    const sortedRoles = Object.entries(data).sort(([,a],[,b]) => b-a).slice(0, 10);
+    const sortedRoles = Object.entries(data).sort(([, a], [, b]) => b - a).slice(0, 10);
     return {
-        labels: sortedRoles.map(([label]) => label),
-        datasets: [{
-            label: 'Top 10 Roles',
-            data: sortedRoles.map(([,value]) => value),
-            backgroundColor: 'rgba(255, 99, 132, 0.6)',
-        }],
+      labels: sortedRoles.map(([label]) => label),
+      datasets: [{
+        label: 'Top 10 Roles',
+        data: sortedRoles.map(([, value]) => value),
+        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+      }],
     };
   }, [filtered]);
 
 
   return (
-    <div className="min-h-screen bg-background text-foreground py-8 px-4">
+    <div className="min-h-screen text-white py-8 px-4">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-6">📊 Placement Statistics</h2>
 
         {/* Filters */}
-        <Card className="mb-8">
+        <Card className="mb-8 bg-white/5 backdrop-blur-md border-white/10 text-white">
           <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <Select onValueChange={(value) => setYearFilter(value === 'all' ? '' : value)} defaultValue="">
-              <SelectTrigger><SelectValue placeholder="All Years" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Years</SelectItem>
-                {years.map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+              <SelectTrigger className="bg-gray-900/50 border-white/10 text-white"><SelectValue placeholder="All Years" /></SelectTrigger>
+              <SelectContent className="bg-gray-900 border-gray-700 text-white">
+                <SelectItem value="all" className="focus:bg-gray-800 focus:text-white">All Years</SelectItem>
+                {years.map(y => <SelectItem key={y} value={String(y)} className="focus:bg-gray-800 focus:text-white">{y}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select onValueChange={(value) => setBranchFilter(value === 'all' ? '' : value)} defaultValue="">
-              <SelectTrigger><SelectValue placeholder="All Branches" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Branches</SelectItem>
-                {branches.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+              <SelectTrigger className="bg-gray-900/50 border-white/10 text-white"><SelectValue placeholder="All Branches" /></SelectTrigger>
+              <SelectContent className="bg-gray-900 border-gray-700 text-white">
+                <SelectItem value="all" className="focus:bg-gray-800 focus:text-white">All Branches</SelectItem>
+                {branches.map(b => <SelectItem key={b} value={b} className="focus:bg-gray-800 focus:text-white">{b}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select onValueChange={(value) => setLpaFilter(value === 'all' ? '' : value)} defaultValue="">
-              <SelectTrigger><SelectValue placeholder="All Packages" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Packages</SelectItem>
-                {lpaRanges.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+              <SelectTrigger className="bg-gray-900/50 border-white/10 text-white"><SelectValue placeholder="All Packages" /></SelectTrigger>
+              <SelectContent className="bg-gray-900 border-gray-700 text-white">
+                <SelectItem value="all" className="focus:bg-gray-800 focus:text-white">All Packages</SelectItem>
+                {lpaRanges.map(r => <SelectItem key={r} value={r} className="focus:bg-gray-800 focus:text-white">{r}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select onValueChange={(value) => setCompanyFilter(value === 'all' ? '' : value)} defaultValue="">
-              <SelectTrigger><SelectValue placeholder="All Companies" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Companies</SelectItem>
-                {companies.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              <SelectTrigger className="bg-gray-900/50 border-white/10 text-white"><SelectValue placeholder="All Companies" /></SelectTrigger>
+              <SelectContent className="bg-gray-900 border-gray-700 text-white">
+                <SelectItem value="all" className="focus:bg-gray-800 focus:text-white">All Companies</SelectItem>
+                {companies.map(c => <SelectItem key={c} value={c} className="focus:bg-gray-800 focus:text-white">{c}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select onValueChange={(value) => setRoleFilter(value === 'all' ? '' : value)} defaultValue="">
-              <SelectTrigger><SelectValue placeholder="All Roles" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                {roles.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+              <SelectTrigger className="bg-gray-900/50 border-white/10 text-white"><SelectValue placeholder="All Roles" /></SelectTrigger>
+              <SelectContent className="bg-gray-900 border-gray-700 text-white">
+                <SelectItem value="all" className="focus:bg-gray-800 focus:text-white">All Roles</SelectItem>
+                {roles.map(r => <SelectItem key={r} value={r} className="focus:bg-gray-800 focus:text-white">{r}</SelectItem>)}
               </SelectContent>
             </Select>
           </CardContent>
@@ -159,40 +159,40 @@ const PlacementStats = () => {
 
         {/* Stats Cards */}
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 mb-12">
-          <Card>
-            <CardHeader><CardTitle>Total Records</CardTitle></CardHeader>
+          <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white">
+            <CardHeader><CardTitle className="text-gray-200">Total Records</CardTitle></CardHeader>
             <CardContent><p className="text-2xl font-bold">{stats.total}</p></CardContent>
           </Card>
-          <Card>
-            <CardHeader><CardTitle>Highest Package</CardTitle></CardHeader>
+          <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white">
+            <CardHeader><CardTitle className="text-gray-200">Highest Package</CardTitle></CardHeader>
             <CardContent><p className="text-2xl font-bold">₹{stats.highest} LPA</p></CardContent>
           </Card>
-          <Card>
-            <CardHeader><CardTitle>Average Package</CardTitle></CardHeader>
+          <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white">
+            <CardHeader><CardTitle className="text-gray-200">Average Package</CardTitle></CardHeader>
             <CardContent><p className="text-2xl font-bold">₹{stats.average} LPA</p></CardContent>
           </Card>
-          <Card>
-            <CardHeader><CardTitle>Median Package</CardTitle></CardHeader>
+          <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white">
+            <CardHeader><CardTitle className="text-gray-200">Median Package</CardTitle></CardHeader>
             <CardContent><p className="text-2xl font-bold">₹{stats.median} LPA</p></CardContent>
           </Card>
         </div>
 
         {/* Charts */}
         <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2 mb-12">
-          <Card className="lg:col-span-1">
-            <CardHeader><CardTitle className="text-center">Year-wise Offers</CardTitle></CardHeader>
-            <CardContent><Bar data={yearData} options={{ responsive: true }} /></CardContent>
+          <Card className="lg:col-span-1 bg-white/10 backdrop-blur-md border-white/10 text-white">
+            <CardHeader><CardTitle className="text-center text-gray-200">Year-wise Offers</CardTitle></CardHeader>
+            <CardContent><Bar data={yearData} options={{ responsive: true, plugins: { legend: { labels: { color: 'white' } } }, scales: { x: { ticks: { color: 'white' } }, y: { ticks: { color: 'white' } } } }} /></CardContent>
           </Card>
-          <Card className="lg:col-span-1">
-            <CardHeader><CardTitle className="text-center">Branch-wise Distribution</CardTitle></CardHeader>
-            <CardContent className="max-h-80 flex justify-center"><Pie data={branchData} options={{ responsive: true, maintainAspectRatio: false }} /></CardContent>
+          <Card className="lg:col-span-1 bg-white/10 backdrop-blur-md border-white/10 text-white">
+            <CardHeader><CardTitle className="text-center text-gray-200">Branch-wise Distribution</CardTitle></CardHeader>
+            <CardContent className="max-h-80 flex justify-center"><Pie data={branchData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: 'white' } } } }} /></CardContent>
           </Card>
         </div>
         <div className="mb-12">
-            <Card>
-                <CardHeader><CardTitle className="text-center">Top 10 Job Roles</CardTitle></CardHeader>
-                <CardContent><Bar data={roleData} options={{ responsive: true, indexAxis: 'y' }} /></CardContent>
-            </Card>
+          <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white">
+            <CardHeader><CardTitle className="text-center text-gray-200">Top 10 Job Roles</CardTitle></CardHeader>
+            <CardContent><Bar data={roleData} options={{ responsive: true, indexAxis: 'y', plugins: { legend: { labels: { color: 'white' } } }, scales: { x: { ticks: { color: 'white' } }, y: { ticks: { color: 'white' } } } }} /></CardContent>
+          </Card>
         </div>
 
         {/* Offer Details */}

@@ -1,1 +1,5 @@
-File not found: /v1/AUTH_mw/wikipedia-commons-local-public.b1/b/b1/Tata_Consultancy_Services_Logo.svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <rect width="200" height="80" fill="transparent"/>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="50" font-weight="bold" fill="#000000">TCS</text>
+  <text x="50%" y="85%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#555555">TATA CONSULTANCY SERVICES</text>
+</svg>

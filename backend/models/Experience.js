@@ -25,6 +25,10 @@ const ExperienceSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  institute: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Institute'
+  }
 });
 
 module.exports = mongoose.model('Experience', ExperienceSchema);

@@ -1,1 +1,10 @@
-File not found: /v1/AUTH_mw/wikipedia-en-local-public.e7/e/e7/Ola_Cabs_logo.svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">
+  <!-- Background transparent -->
+  <!-- Logo Text: White for dark mode compatibility -->
+  <!-- Circle: Neon Green #B2F13C -->
+  
+  <circle cx="50" cy="40" r="22" stroke="#FFFFFF" stroke-width="4" fill="transparent"/>
+  <circle cx="50" cy="40" r="8" fill="#B2F13C"/>
+  
+  <text x="90" y="55" font-family="Arial, sans-serif" font-size="50" font-weight="bold" fill="#FFFFFF">Ola</text>
+</svg>
