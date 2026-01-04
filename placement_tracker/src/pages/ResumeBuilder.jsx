@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+// ... (inside ResumeBuilder)
+
 import { useAuth } from '../context/AuthContext';
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -7,6 +11,14 @@ import { Textarea } from "../components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Loader2, ArrowRight, ArrowLeft, FileText, CheckCircle2, Plus, Trash2 } from 'lucide-react';
 import { Checkbox } from "../components/ui/checkbox";
+import PersonalInfoStep from '../components/Resume/PersonalInfoStep';
+import EducationStep from '../components/Resume/EducationStep';
+import ExperienceStep from '../components/Resume/ExperienceStep';
+import ProjectsStep from '../components/Resume/ProjectsStep';
+import SkillsStep from '../components/Resume/SkillsStep';
+
+
+
 
 const STEPS = [
     { id: 1, title: 'Personal Info', description: 'Contact details and summary' },
@@ -18,6 +30,7 @@ const STEPS = [
 
 const ResumeBuilder = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(1);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -138,18 +151,67 @@ const ResumeBuilder = () => {
         setResumeData(prev => ({ ...prev, experience: newExp }));
     };
 
+    // 4. Projects Handlers
+    const addProject = () => {
+        setResumeData(prev => ({
+            ...prev,
+            projects: [
+                ...prev.projects,
+                { title: '', link: '', technologies: '', description: '' }
+            ]
+        }));
+    };
+
+    const removeProject = (index) => {
+        const newProj = [...resumeData.projects];
+        newProj.splice(index, 1);
+        setResumeData(prev => ({ ...prev, projects: newProj }));
+    };
+
+    const handleProjectChange = (index, e) => {
+        const { name, value } = e.target;
+        const newProj = [...resumeData.projects];
+        newProj[index] = {
+            ...newProj[index],
+            [name]: value
+        };
+        setResumeData(prev => ({ ...prev, projects: newProj }));
+    };
+
+    // 5. Skills Handlers
+    const addSkill = (skill) => {
+        setResumeData(prev => ({
+            ...prev,
+            skills: [...prev.skills, skill]
+        }));
+    };
+
+    const removeSkill = (index) => {
+        const newSkills = [...resumeData.skills];
+        newSkills.splice(index, 1);
+        setResumeData(prev => ({ ...prev, skills: newSkills }));
+    };
+
     // Save Data to Backend
     const saveResume = async () => {
         setSaving(true);
         try {
             const token = user.token || localStorage.getItem('placerra_token');
+            // 🧹 Clean Data: Remove empty entries before saving
+            // This allows freshers to skip Experience without validation errors
+            const cleanedData = {
+                ...resumeData,
+                education: resumeData.education.filter(edu => edu.institute && edu.institute.trim() !== ''),
+                experience: resumeData.experience.filter(exp => exp.company && exp.company.trim() !== '')
+            };
+
             const res = await fetch('/api/resume/update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(resumeData)
+                body: JSON.stringify(cleanedData)
             });
 
             if (!res.ok) {
@@ -167,6 +229,8 @@ const ResumeBuilder = () => {
         await saveResume();
         if (activeStep < STEPS.length) {
             setActiveStep(prev => prev + 1);
+        } else {
+            navigate('/resume/preview');
         }
     };
 
@@ -235,184 +299,66 @@ const ResumeBuilder = () => {
                                 <Plus className="h-4 w-4 mr-2" /> Add Position
                             </Button>
                         )}
+                        {activeStep === 4 && (
+                            <Button onClick={addProject} size="sm" className="bg-blue-600 hover:bg-blue-700">
+                                <Plus className="h-4 w-4 mr-2" /> Add Project
+                            </Button>
+                        )}
                     </CardHeader>
                     <CardContent className="pt-6">
 
                         {/* STEP 1: PERSONAL INFO */}
                         {activeStep === 1 && (
-                            <div className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="firstName" className="text-slate-300">First Name</Label>
-                                        <Input id="firstName" value={resumeData.personalInfo.firstName} onChange={handlePersonalChange} className="bg-slate-950 border-slate-700" placeholder="e.g. John" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="lastName" className="text-slate-300">Last Name</Label>
-                                        <Input id="lastName" value={resumeData.personalInfo.lastName} onChange={handlePersonalChange} className="bg-slate-950 border-slate-700" placeholder="e.g. Doe" />
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email" className="text-slate-300">Email Address</Label>
-                                        <Input id="email" value={resumeData.personalInfo.email} onChange={handlePersonalChange} className="bg-slate-950 border-slate-700" placeholder="e.g. john@example.com" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="phone" className="text-slate-300">Phone Number</Label>
-                                        <Input id="phone" value={resumeData.personalInfo.phone} onChange={handlePersonalChange} className="bg-slate-950 border-slate-700" placeholder="e.g. +91 98765 43210" />
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="linkedin" className="text-slate-300">LinkedIn</Label>
-                                        <Input id="linkedin" value={resumeData.personalInfo.linkedin} onChange={handlePersonalChange} className="bg-slate-950 border-slate-700" placeholder="linkedin.com/in/..." />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="github" className="text-slate-300">GitHub</Label>
-                                        <Input id="github" value={resumeData.personalInfo.github} onChange={handlePersonalChange} className="bg-slate-950 border-slate-700" placeholder="github.com/..." />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="website" className="text-slate-300">Website</Label>
-                                        <Input id="website" value={resumeData.personalInfo.website} onChange={handlePersonalChange} className="bg-slate-950 border-slate-700" placeholder="myportfolio.com" />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="summary" className="text-slate-300">Professional Summary</Label>
-                                    <Textarea id="summary" value={resumeData.personalInfo.summary} onChange={handlePersonalChange} className="bg-slate-950 border-slate-700 h-32" placeholder="Briefly describe your career goals..." />
-                                </div>
-                            </div>
+                            <PersonalInfoStep
+                                data={resumeData.personalInfo}
+                                onChange={handlePersonalChange}
+                            />
                         )}
+
 
                         {/* STEP 2: EDUCATION */}
                         {activeStep === 2 && (
-                            <div className="space-y-6">
-                                {resumeData.education.length === 0 && (
-                                    <div className="text-center py-10 text-slate-500 border-2 border-dashed border-slate-800 rounded-lg">
-                                        No education added yet. Click "Add School" to begin.
-                                    </div>
-                                )}
-                                {resumeData.education.map((edu, index) => (
-                                    <Card key={index} className="bg-slate-950 border-slate-800 relative group">
-                                        <Button
-                                            variant="ghost" size="icon"
-                                            onClick={() => removeEducation(index)}
-                                            className="absolute top-2 right-2 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                        <CardContent className="pt-6 space-y-4">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-300">Institute / School</Label>
-                                                    <Input name="institute" value={edu.institute} onChange={(e) => handleEducationChange(index, e)} className="bg-slate-900 border-slate-700" placeholder="e.g. NIT Jhalwa" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-300">Degree</Label>
-                                                    <Input name="degree" value={edu.degree} onChange={(e) => handleEducationChange(index, e)} className="bg-slate-900 border-slate-700" placeholder="e.g. B.Tech" />
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-300">Field of Study</Label>
-                                                    <Input name="fieldOfStudy" value={edu.fieldOfStudy} onChange={(e) => handleEducationChange(index, e)} className="bg-slate-900 border-slate-700" placeholder="e.g. Computer Science" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-300">Score (CGPA/%)</Label>
-                                                    <Input name="score" value={edu.score} onChange={(e) => handleEducationChange(index, e)} className="bg-slate-900 border-slate-700" placeholder="e.g. 9.5" />
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-300">Start Date</Label>
-                                                    <Input type="date" name="startDate" value={edu.startDate ? edu.startDate.split('T')[0] : ''} onChange={(e) => handleEducationChange(index, e)} className="bg-slate-900 border-slate-700" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-300">End Date</Label>
-                                                    <Input type="date" name="endDate" value={edu.endDate ? edu.endDate.split('T')[0] : ''} onChange={(e) => handleEducationChange(index, e)} disabled={edu.current} className="bg-slate-900 border-slate-700 disabled:opacity-50" />
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <Checkbox
-                                                    id={`edu-current-${index}`}
-                                                    name="current"
-                                                    checked={edu.current}
-                                                    onCheckedChange={(checked) => handleEducationChange(index, { target: { name: 'current', type: 'checkbox', checked } })}
-                                                    className="border-slate-500"
-                                                />
-                                                <Label htmlFor={`edu-current-${index}`} className="text-slate-400 font-normal">I currently study here</Label>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
+                            <EducationStep
+                                data={resumeData.education}
+                                onChange={handleEducationChange}
+                                onRemove={removeEducation}
+                            />
                         )}
+
 
                         {/* STEP 3: EXPERIENCE */}
                         {activeStep === 3 && (
-                            <div className="space-y-6">
-                                {resumeData.experience.length === 0 && (
-                                    <div className="text-center py-10 text-slate-500 border-2 border-dashed border-slate-800 rounded-lg">
-                                        No experience added yet. Click "Add Position" to begin.
-                                    </div>
-                                )}
-                                {resumeData.experience.map((exp, index) => (
-                                    <Card key={index} className="bg-slate-950 border-slate-800 relative group">
-                                        <Button
-                                            variant="ghost" size="icon"
-                                            onClick={() => removeExperience(index)}
-                                            className="absolute top-2 right-2 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                        <CardContent className="pt-6 space-y-4">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-300">Company Name</Label>
-                                                    <Input name="company" value={exp.company} onChange={(e) => handleExperienceChange(index, e)} className="bg-slate-900 border-slate-700" placeholder="e.g. Google" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-300">Job Title / Role</Label>
-                                                    <Input name="role" value={exp.role} onChange={(e) => handleExperienceChange(index, e)} className="bg-slate-900 border-slate-700" placeholder="e.g. SDE Intern" />
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-slate-300">Location</Label>
-                                                <Input name="location" value={exp.location} onChange={(e) => handleExperienceChange(index, e)} className="bg-slate-900 border-slate-700" placeholder="e.g. Bangalore, Remote" />
-                                            </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-300">Start Date</Label>
-                                                    <Input type="date" name="startDate" value={exp.startDate ? exp.startDate.split('T')[0] : ''} onChange={(e) => handleExperienceChange(index, e)} className="bg-slate-900 border-slate-700" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-300">End Date</Label>
-                                                    <Input type="date" name="endDate" value={exp.endDate ? exp.endDate.split('T')[0] : ''} onChange={(e) => handleExperienceChange(index, e)} disabled={exp.current} className="bg-slate-900 border-slate-700 disabled:opacity-50" />
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <Checkbox
-                                                    id={`exp-current-${index}`}
-                                                    name="current"
-                                                    checked={exp.current}
-                                                    onCheckedChange={(checked) => handleExperienceChange(index, { target: { name: 'current', type: 'checkbox', checked } })}
-                                                    className="border-slate-500"
-                                                />
-                                                <Label htmlFor={`exp-current-${index}`} className="text-slate-400 font-normal">I currently work here</Label>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-slate-300">Description</Label>
-                                                <Textarea name="description" value={exp.description} onChange={(e) => handleExperienceChange(index, e)} className="bg-slate-900 border-slate-700 h-24" placeholder="Built features for..." />
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
+                            <ExperienceStep
+                                data={resumeData.experience}
+                                onChange={handleExperienceChange}
+                                onRemove={removeExperience}
+                            />
                         )}
 
+                        {/* STEP 4: PROJECTS */}
+                        {activeStep === 4 && (
+                            <ProjectsStep
+                                data={resumeData.projects}
+                                onChange={handleProjectChange}
+                                onRemove={removeProject}
+                            />
+                        )}
+
+                        {/* STEP 5: SKILLS */}
+                        {activeStep === 5 && (
+                            <SkillsStep
+                                skills={resumeData.skills}
+                                onAdd={addSkill}
+                                onRemove={removeSkill}
+                            />
+                        )}
+
+
                         {/* PLACEHOLDERS FOR FUTURE STEPS */}
-                        {activeStep > 3 && (
+                        {activeStep > 4 && (
                             <div className="text-center py-12 text-slate-500">
                                 <p>Step {activeStep} content coming soon...</p>
-                                <p className="text-xs mt-2">Projects and Skills sections under construction</p>
+                                <p className="text-xs mt-2">Skills section under construction</p>
                             </div>
                         )}
 

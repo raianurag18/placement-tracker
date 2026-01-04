@@ -43,7 +43,7 @@ const Header = ({ user }) => {
                   <Link to="/my-applications"><Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-white/10 rounded-full px-5 transition-all duration-300">My Applications</Button></Link>
                   <Link to="/stats"><Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-white/10 rounded-full px-5 transition-all duration-300">Stats</Button></Link>
                   <Link to="/experiences"><Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-white/10 rounded-full px-5 transition-all duration-300">Experiences</Button></Link>
-                  <Link to="/resume"><Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-white/10 rounded-full px-5 transition-all duration-300">Resume</Button></Link>
+                  <Link to="/resume/preview"><Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-white/10 rounded-full px-5 transition-all duration-300">Resume</Button></Link>
                   <Link to="/submit"><Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-white/10 rounded-full px-5 transition-all duration-300">Submit Experience</Button></Link>
                 </>
               )}
@@ -88,7 +88,7 @@ const Header = ({ user }) => {
                       <Link to="/my-applications" onClick={closeSheet}><Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-white/10">My Applications</Button></Link>
                       <Link to="/stats" onClick={closeSheet}><Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-white/10">Stats</Button></Link>
                       <Link to="/experiences" onClick={closeSheet}><Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-white/10">Experiences</Button></Link>
-                      <Link to="/resume" onClick={closeSheet}><Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-white/10">Resume</Button></Link>
+                      <Link to="/resume/preview" onClick={closeSheet}><Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-white/10">Resume</Button></Link>
                       <Link to="/submit" onClick={closeSheet}><Button variant="ghost" className="justify-start text-gray-300 hover:text-white hover:bg-white/10">Submit Experience</Button></Link>
                     </>
                   )}

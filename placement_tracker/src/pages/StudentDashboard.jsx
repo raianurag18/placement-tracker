@@ -1,9 +1,7 @@
-import React from 'react';
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Briefcase, DollarSign, Users, BarChart, User, FileText } from 'lucide-react';
+import { Briefcase, DollarSign, Users, BarChart, TrendingUp, Calendar, ArrowRight, User } from 'lucide-react';
 
 const StudentDashboard = ({ user }) => {
   const [experiences, setExperiences] = useState([]);
@@ -26,127 +24,152 @@ const StudentDashboard = ({ user }) => {
       .catch((err) => console.error("Error fetching stats:", err));
   }, []);
 
-  const displayStats = [
-    { title: "Total Companies", value: stats.totalCompanies, icon: <Briefcase className="h-8 w-8 text-blue-500" />, link: "/companies" },
-    { title: "Total Offers", value: stats.totalOffers, icon: <Users className="h-8 w-8 text-green-500" /> },
-    { title: "Highest Package", value: `₹ ${stats.highestPackage} LPA`, icon: <DollarSign className="h-8 w-8 text-yellow-500" />, link: "/highest-package-branch" },
-    { title: "Average Package", value: `₹ ${stats.averagePackage.toFixed(2)} LPA`, icon: <BarChart className="h-8 w-8 text-indigo-500" />, link: "/branch-stats" },
-  ];
+  const StatCard = ({ title, value, icon: Icon, color, link, colSpan = "col-span-1" }) => (
+    <Link to={link || '#'} className={`${colSpan} block group`}>
+      <div className="h-full bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
+        <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity ${color}`}>
+          <Icon className="w-24 h-24 -mr-8 -mt-8" />
+        </div>
+        <div className="relative z-10 flex flex-col justify-between h-full">
+          <div>
+            <div className={`p-2 w-fit rounded-lg mb-4 ${color.replace('text-', 'bg-').replace('500', '100')}`}>
+              <Icon className={`w-6 h-6 ${color}`} />
+            </div>
+            <h3 className="text-slate-500 text-sm font-semibold uppercase tracking-wider">{title}</h3>
+          </div>
+          <div className="mt-2">
+            <span className="text-3xl font-bold text-slate-900">{value}</span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
 
   return (
-    <div className="min-h-screen text-foreground">
-      {/* Hero Section */}
-      <header className="rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 mb-8 p-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-white">
-            Welcome to the Placerra
+    <div className="space-y-8 animate-in fade-in duration-500">
+
+      {/* Header / Hero */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">
+            Welcome back, <span className="text-blue-600">{user?.name?.split(' ')[0]}</span>! 👋
           </h1>
-          <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-300">
-            Your one-stop destination for placement statistics and interview experiences.
-          </p>
+          <p className="text-slate-500 mt-1">Here is what's happening in your placement journey today.</p>
         </div>
-      </header>
+        <div className="flex gap-3">
+          <Link to="/resume/preview">
+            <Button variant="outline" className="border-slate-300 text-slate-700 hover:bg-slate-50">View Resume</Button>
+          </Link>
+          <Link to="/jobs">
+            <Button className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20">Browse Jobs</Button>
+          </Link>
+        </div>
+      </div>
 
-      <main>
-        {/* Placement Stats Section */}
-        <section className="mb-12">
-          <h2 className="text-3xl font-extrabold text-center mb-8 text-white">
-            Placement Overview - 2025
-          </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {displayStats.map((stat, index) => (
-              <Link to={stat.link || '#'} key={index}>
-                <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white transition-transform duration-300 ease-in-out hover:scale-105 hover:bg-white/20 hover:shadow-lg">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-200">{stat.title}</CardTitle>
-                    {stat.icon}
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </section>
+      {/* Bento Grid Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-        {/* Interview Experiences Section */}
-        <section className="mb-12">
-          <h2 className="text-3xl font-extrabold text-center mb-8 text-white">
-            Recent Interview Experiences
-          </h2>
-          {experiences.length === 0 ? (
-            <p className="text-center text-gray-400">No experiences submitted yet.</p>
-          ) : (
-            <div className="grid gap-8 lg:grid-cols-2">
-              {experiences.slice(0, 2).map((exp) => (
-                <Card key={exp._id} className="bg-white/10 backdrop-blur-md border-white/10 text-white">
-                  <CardHeader>
-                    <CardTitle>{exp.company} - <span className="font-semibold text-blue-300">{exp.role}</span></CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-300 mt-1">
-                      By <span className="font-medium">{exp.name}</span> | Package: <span className="font-medium">{exp.package}</span>
-                    </p>
-                    <p className="text-gray-100 mt-4 whitespace-pre-wrap">{exp.experience}</p>
-                  </CardContent>
-                </Card>
-              ))}
+        {/* Highest Package - Hero Stat */}
+        <div className="col-span-1 md:col-span-2 bg-white rounded-2xl p-8 border border-slate-200 shadow-sm relative overflow-hidden group">
+          <div className="absolute right-0 top-0 h-full w-1/2 bg-gradient-to-l from-blue-50 to-transparent"></div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="w-5 h-5 text-green-500" />
+              <span className="text-green-600 font-medium text-sm">Top Performance</span>
             </div>
-          )}
-          <div className="text-center mt-8">
-            <Link to="/experiences">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">View All Experiences</Button>
+            <h3 className="text-slate-500 font-medium">Highest Package Record</h3>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-5xl font-bold text-slate-900 tracking-tight">₹ {stats.highestPackage}</span>
+              <span className="text-xl text-slate-400 font-medium">LPA</span>
+            </div>
+            <Link to="/highest-package-branch" className="mt-6 inline-flex items-center text-blue-600 font-medium hover:text-blue-700">
+              View Details <ArrowRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
-        </section>
+        </div>
 
-        {/* Student Reviews Section */}
-        <section className="mb-12">
-          <h2 className="text-3xl font-extrabold text-center mb-8 text-white">
-            What Our Seniors Say
-          </h2>
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white">
-              <CardContent className="pt-6">
-                <p className="italic text-gray-300">"Start solving DSA early, and make sure your GitHub and resume are clean!"</p>
-                <p className="mt-4 text-right font-medium text-blue-400">— Ayush, Placed at Amazon</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white">
-              <CardContent className="pt-6">
-                <p className="italic text-gray-300">"Don’t ignore soft skills. Communication helped me crack HR rounds easily."</p>
-                <p className="mt-4 text-right font-medium text-blue-400">— Mehak, Placed at Microsoft</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white">
-              <CardContent className="pt-6">
-                <p className="italic text-gray-300">"Be consistent with CP. I gave 500+ Leetcode problems before placements!"</p>
-                <p className="mt-4 text-right font-medium text-blue-400">— Rohan, Placed at Atlassian</p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+        <StatCard
+          title="Total Offers"
+          value={stats.totalOffers}
+          icon={Users}
+          color="text-purple-500"
+          link="/stats"
+        />
 
-        {/* CTA Section */}
-        <section className="rounded-lg bg-white/5 backdrop-blur-lg border border-white/10">
-          <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-              <span className="block text-white">Ready to dive in?</span>
-              <span className="block text-blue-400">Share your interview experience today.</span>
-            </h2>
-            <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0">
-              <div className="inline-flex rounded-md shadow">
-                <Link to="/submit">
-                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
-                    Get started
-                  </Button>
-                </Link>
-              </div>
+        <StatCard
+          title="Active Companies"
+          value={stats.totalCompanies}
+          icon={Briefcase}
+          color="text-blue-500"
+          link="/companies"
+        />
+      </div>
+
+      {/* Secondary Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* Average Package & Chart Placeholder */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="p-2 w-fit rounded-lg mb-4 bg-indigo-100">
+              <BarChart className="w-6 h-6 text-indigo-600" />
+            </div>
+            <h3 className="text-slate-500 text-sm font-semibold uppercase tracking-wider">Average Package</h3>
+            <div className="mt-2">
+              <span className="text-3xl font-bold text-slate-900">₹ {stats.averagePackage.toFixed(2)}</span>
+              <span className="text-sm text-slate-400 ml-1">LPA</span>
             </div>
           </div>
-        </section>
-      </main>
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <p className="text-xs text-slate-400">Consistent growth over last 3 years.</p>
+          </div>
+        </div>
+
+        {/* Quick Actions / Notices */}
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+          <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h3 className="font-bold text-slate-900">Recent Interview Experiences</h3>
+            <Link to="/experiences" className="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</Link>
+          </div>
+          <div className="p-6">
+            {experiences.length === 0 ? (
+              <div className="text-center py-8 text-slate-400">No experiences yet. Be the first!</div>
+            ) : (
+              <div className="space-y-4">
+                {experiences.slice(0, 3).map((exp, i) => (
+                  <div key={i} className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-50 transition-colors cursor-default">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold shrink-0">
+                      {exp.company?.charAt(0)}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-slate-900">{exp.company}</h4>
+                      <p className="text-sm text-slate-500">{exp.role} • <span className="text-green-600 font-medium">{exp.package}</span></p>
+                    </div>
+                    <div className="text-xs text-slate-400 whitespace-nowrap">
+                      {new Date().toLocaleDateString()} {/* Placeholder for date */}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+
+      {/* Call to Action */}
+      <div className="bg-slate-900 rounded-2xl p-8 md:p-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-blue-500/20 blur-3xl"></div>
+
+        <div className="relative z-10 max-w-2xl">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Ready to help your juniors?</h2>
+          <p className="text-slate-300 mb-8 text-lg">Share your interview journey. Your insights can help someone land their dream job.</p>
+          <Link to="/submit">
+            <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100">Share Experience</Button>
+          </Link>
+        </div>
+      </div>
+
     </div>
   );
 };

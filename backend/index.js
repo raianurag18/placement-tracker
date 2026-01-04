@@ -11,6 +11,9 @@ const experienceRoutes = require('./routes/experiences');
 const adminRoutes = require('./routes/admin');
 const instituteRoutes = require('./routes/institutes');
 const profileRoutes = require('./routes/profile');
+const jobRoutes = require('./routes/jobs');
+const applicationRoutes = require('./routes/applications');
+const resumeRoutes = require('./routes/resume');
 const path = require('path');
 
 const app = express();
@@ -39,9 +42,9 @@ app.use('/api/experiences', experienceRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/institutes', instituteRoutes);
 app.use('/api/profile', profileRoutes);
-app.use('/api/jobs', require('./routes/jobs'));
-app.use('/api/applications', require('./routes/applications'));
-app.use('/api/resume', require('./routes/resume'));
+app.use('/api/jobs', jobRoutes);
+app.use('/api/applications', applicationRoutes);
+app.use('/api/resume', resumeRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;

@@ -37,7 +37,7 @@ const MyApplications = () => {
 
     // Sheet State
     const [isSheetOpen, setIsSheetOpen] = useState(false);
-    const [editingApp, setEditingApp] = useState(null); // If null, we are creating. If set, we are editing.
+    const [editingApp, setEditingApp] = useState(null);
     const [formData, setFormData] = useState({
         company: '',
         role: '',
@@ -151,7 +151,6 @@ const MyApplications = () => {
 
         try {
             const token = user.token || localStorage.getItem('placerra_token');
-            // Use PATCH route (which we just fixed to ignore validation errors)
             const res = await fetch(`/api/applications/${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -166,66 +165,66 @@ const MyApplications = () => {
 
     const getColumnColor = (status) => {
         switch (status) {
-            case 'Applied': return 'bg-blue-500/10 border-blue-500/20 text-blue-400';
-            case 'Assessment': return 'bg-purple-500/10 border-purple-500/20 text-purple-400';
-            case 'Interview': return 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400';
-            case 'Selected': return 'bg-green-500/10 border-green-500/20 text-green-400';
-            case 'Rejected': return 'bg-red-500/10 border-red-500/20 text-red-400';
-            default: return 'bg-slate-800 border-slate-700';
+            case 'Applied': return 'bg-blue-50 border-blue-100 text-blue-700';
+            case 'Assessment': return 'bg-purple-50 border-purple-100 text-purple-700';
+            case 'Interview': return 'bg-amber-50 border-amber-100 text-amber-700';
+            case 'Selected': return 'bg-green-50 border-green-100 text-green-700';
+            case 'Rejected': return 'bg-red-50 border-red-100 text-red-700';
+            default: return 'bg-slate-100 border-slate-200';
         }
     };
 
     if (loading) return (
-        <div className="flex justify-center items-center h-screen bg-slate-950">
-            <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
+        <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-slate-950 pt-24 px-4 sm:px-6 lg:px-8 font-sans overflow-x-auto">
-            <div className="max-w-[1600px] mx-auto">
-                <div className="mb-8 flex justify-between items-center">
+        <div className="space-y-8 animate-in fade-in duration-500 overflow-x-auto pb-4">
+            <div className="min-w-max">
+                <div className="mb-8 flex justify-between items-center sticky left-0">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-white flex items-center">
-                            <Briefcase className="mr-3 h-8 w-8 text-blue-500" />
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center">
+                            <Briefcase className="mr-3 h-8 w-8 text-blue-600" />
                             My Application Board
                         </h1>
-                        <p className="mt-2 text-slate-400">Track and manage your job applications.</p>
+                        <p className="mt-2 text-slate-500">Track and manage your job applications.</p>
                     </div>
-                    <Button onClick={openCreate} className="bg-blue-600 hover:bg-blue-700">
+                    <Button onClick={openCreate} className="bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/20">
                         <Plus className="mr-2 h-4 w-4" /> Add Application
                     </Button>
                 </div>
 
-                <div className="flex gap-6 pb-8 min-w-max">
+                <div className="flex gap-6 pb-8">
                     {COLUMN_STATUSES.map(status => {
                         const columnApps = applications.filter(app => app.status === status);
                         return (
                             <div key={status} className="w-80 flex-shrink-0">
                                 <div className={`flex items-center justify-between mb-4 p-3 rounded-lg border ${getColumnColor(status)}`}>
                                     <span className="font-semibold">{status}</span>
-                                    <Badge variant="secondary" className="bg-black/30 text-inherit border-0">
+                                    <Badge variant="secondary" className="bg-white/50 text-inherit border-0 shadow-sm">
                                         {columnApps.length}
                                     </Badge>
                                 </div>
                                 <div className="space-y-4">
                                     {columnApps.map(app => (
-                                        <Card key={app._id} className="bg-slate-900/50 border-slate-800 text-white hover:border-slate-700 transition-colors relative group">
-                                            <CardHeader className="p-4 pb-2 pr-10"> {/* pr-10 for menu space */}
-                                                <CardTitle className="text-lg font-medium text-slate-200 truncate">{app.company}</CardTitle>
-                                                <p className="text-sm text-slate-400 truncate">{app.role}</p>
+                                        <Card key={app._id} className="bg-white border-slate-200 text-slate-900 hover:border-blue-300 transition-colors relative group shadow-sm">
+                                            <CardHeader className="p-4 pb-2 pr-10">
+                                                <CardTitle className="text-lg font-medium text-slate-800 truncate">{app.company}</CardTitle>
+                                                <p className="text-sm text-slate-500 truncate">{app.role}</p>
                                             </CardHeader>
                                             <CardContent className="p-4 pt-2">
-                                                <div className="text-xs text-slate-500 mb-4">
+                                                <div className="text-xs text-slate-400 mb-4">
                                                     Applied: {new Date(app.appliedAt).toLocaleDateString()}
                                                 </div>
 
                                                 {/* Actions Footer */}
-                                                <div className="flex justify-between items-center mt-2 pt-3 border-t border-slate-800/50">
+                                                <div className="flex justify-between items-center mt-2 pt-3 border-t border-slate-100">
                                                     {status !== 'Applied' && (
                                                         <button
                                                             onClick={() => quickUpdateStatus(app._id, COLUMN_STATUSES[COLUMN_STATUSES.indexOf(status) - 1])}
-                                                            className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                                                            className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
                                                         >
                                                             &larr; Prev
                                                         </button>
@@ -234,26 +233,26 @@ const MyApplications = () => {
                                                     {status !== 'Rejected' && status !== 'Selected' && (
                                                         <button
                                                             onClick={() => quickUpdateStatus(app._id, COLUMN_STATUSES[COLUMN_STATUSES.indexOf(status) + 1])}
-                                                            className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors ml-auto"
+                                                            className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors ml-auto"
                                                         >
                                                             Next &rarr;
                                                         </button>
                                                     )}
                                                 </div>
 
-                                                {/* Dropdown Menu (Top Right) */}
+                                                {/* Dropdown Menu */}
                                                 <div className="absolute top-4 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-white">
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700">
                                                                 <MoreHorizontal className="h-4 w-4" />
                                                             </Button>
                                                         </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end" className="w-32 bg-slate-900 border-slate-800 text-slate-300">
-                                                            <DropdownMenuItem onClick={() => openEdit(app)} className="hover:bg-slate-800 cursor-pointer">
+                                                        <DropdownMenuContent align="end" className="w-32 bg-white border-slate-200 text-slate-700">
+                                                            <DropdownMenuItem onClick={() => openEdit(app)} className="hover:bg-slate-50 cursor-pointer">
                                                                 <Pencil className="mr-2 h-4 w-4" /> Edit
                                                             </DropdownMenuItem>
-                                                            <DropdownMenuItem onClick={() => handleDelete(app._id)} className="text-red-400 hover:bg-slate-800 cursor-pointer">
+                                                            <DropdownMenuItem onClick={() => handleDelete(app._id)} className="text-red-500 hover:bg-red-50 cursor-pointer">
                                                                 <Trash className="mr-2 h-4 w-4" /> Delete
                                                             </DropdownMenuItem>
                                                         </DropdownMenuContent>
@@ -270,46 +269,46 @@ const MyApplications = () => {
 
                 {/* Create/Edit Sheet */}
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                    <SheetContent className="bg-slate-950 border-slate-800 text-white sm:max-w-md">
+                    <SheetContent className="bg-white border-l-slate-200 text-slate-900 sm:max-w-md">
                         <SheetHeader>
-                            <SheetTitle className="text-slate-100">{editingApp ? 'Edit Application' : 'Add New Application'}</SheetTitle>
-                            <SheetDescription className="text-slate-400">
+                            <SheetTitle className="text-slate-900">{editingApp ? 'Edit Application' : 'Add New Application'}</SheetTitle>
+                            <SheetDescription className="text-slate-500">
                                 {editingApp ? 'Update application details and notes.' : 'Manually track an application you submitted outside the portal.'}
                             </SheetDescription>
                         </SheetHeader>
                         <form onSubmit={handleSave} className="space-y-6 mt-6">
                             <div className="space-y-2">
-                                <Label htmlFor="company" className="text-slate-300">Company Name</Label>
+                                <Label htmlFor="company" className="text-slate-700">Company Name</Label>
                                 <Input
                                     id="company"
                                     value={formData.company}
                                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                                     required
-                                    className="bg-slate-900 border-slate-700 focus:ring-blue-500"
+                                    className="bg-white border-slate-200 focus:ring-blue-500 text-slate-900"
                                     placeholder="e.g. Google"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="role" className="text-slate-300">Role / Position</Label>
+                                <Label htmlFor="role" className="text-slate-700">Role / Position</Label>
                                 <Input
                                     id="role"
                                     value={formData.role}
                                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                     required
-                                    className="bg-slate-900 border-slate-700 focus:ring-blue-500"
+                                    className="bg-white border-slate-200 focus:ring-blue-500 text-slate-900"
                                     placeholder="e.g. SDE Intern"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="status" className="text-slate-300">Current Status</Label>
+                                <Label htmlFor="status" className="text-slate-700">Current Status</Label>
                                 <Select
                                     value={formData.status}
                                     onValueChange={(val) => setFormData({ ...formData, status: val })}
                                 >
-                                    <SelectTrigger className="bg-slate-900 border-slate-700 text-slate-200">
+                                    <SelectTrigger className="bg-white border-slate-200 text-slate-900">
                                         <SelectValue placeholder="Select Status" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-slate-900 border-slate-800 text-slate-200">
+                                    <SelectContent className="bg-white border-slate-200 text-slate-900">
                                         {COLUMN_STATUSES.map(status => (
                                             <SelectItem key={status} value={status}>{status}</SelectItem>
                                         ))}
@@ -317,17 +316,17 @@ const MyApplications = () => {
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="notes" className="text-slate-300">Notes (Optional)</Label>
+                                <Label htmlFor="notes" className="text-slate-700">Notes (Optional)</Label>
                                 <Textarea
                                     id="notes"
                                     value={formData.notes}
                                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                    className="bg-slate-900 border-slate-700 focus:ring-blue-500 min-h-[100px]"
+                                    className="bg-white border-slate-200 focus:ring-blue-500 min-h-[100px] text-slate-900"
                                     placeholder="Add interview dates, contact details, or other notes..."
                                 />
                             </div>
                             <div className="flex justify-end gap-3 pt-4">
-                                <Button type="button" variant="ghost" onClick={() => setIsSheetOpen(false)} className="text-slate-400 hover:text-white">
+                                <Button type="button" variant="ghost" onClick={() => setIsSheetOpen(false)} className="text-slate-500 hover:text-slate-900">
                                     Cancel
                                 </Button>
                                 <Button type="submit" className="bg-blue-600 hover:bg-blue-700">

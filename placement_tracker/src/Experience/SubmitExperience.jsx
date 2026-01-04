@@ -52,7 +52,6 @@ const SubmitExperience = () => {
           experience: ''
         });
 
-        // Optional: Auto-hide success after 5 seconds
         setTimeout(() => {
           setSuccess('');
         }, 5000);
@@ -67,24 +66,24 @@ const SubmitExperience = () => {
   };
 
   return (
-    <div className="min-h-screen py-12 px-4">
+    <div className="space-y-8 animate-in fade-in duration-500 py-12 px-4">
       <div className="max-w-3xl mx-auto">
-        <Button asChild variant="link" className="mb-6">
+        <Button asChild variant="ghost" className="mb-6 hover:bg-slate-100 text-slate-600">
           <Link to="/">
             ← Back to Home
           </Link>
         </Button>
 
-        <Card className="bg-white/10 backdrop-blur-md border border-white/10 text-white shadow-2xl">
+        <Card className="bg-white border-slate-200 text-slate-900 shadow-xl">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Submit Your Interview Experience</CardTitle>
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Submit Your Interview Experience</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {success && <div className="p-3 bg-green-500/20 border border-green-500 rounded text-green-300 text-center">{success}</div>}
-              {error && <div className="p-3 bg-red-500/20 border border-red-500 rounded text-red-300 text-center">{error}</div>}
+              {success && <div className="p-3 bg-green-50 border border-green-200 rounded text-green-700 text-center">{success}</div>}
+              {error && <div className="p-3 bg-red-50 border border-red-200 rounded text-red-700 text-center">{error}</div>}
               <div className="grid gap-2">
-                <Label htmlFor="name" className="text-gray-300">Your Name</Label>
+                <Label htmlFor="name" className="text-slate-700">Your Name</Label>
                 <Input
                   id="name"
                   name="name"
@@ -92,11 +91,11 @@ const SubmitExperience = () => {
                   placeholder="Your Name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20"
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="company" className="text-gray-300">Company</Label>
+                <Label htmlFor="company" className="text-slate-700">Company</Label>
                 <Input
                   id="company"
                   name="company"
@@ -104,12 +103,12 @@ const SubmitExperience = () => {
                   placeholder="Company"
                   value={formData.company}
                   onChange={handleChange}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="role" className="text-gray-300">Role</Label>
+                  <Label htmlFor="role" className="text-slate-700">Role</Label>
                   <Input
                     id="role"
                     name="role"
@@ -117,11 +116,11 @@ const SubmitExperience = () => {
                     placeholder="Role"
                     value={formData.role}
                     onChange={handleChange}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500/20"
+                    className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="package" className="text-gray-300">Package</Label>
+                  <Label htmlFor="package" className="text-slate-700">Package</Label>
                   <Input
                     id="package"
                     name="package"
@@ -129,12 +128,12 @@ const SubmitExperience = () => {
                     placeholder="e.g., 12 LPA"
                     value={formData.package}
                     onChange={handleChange}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500/20"
+                    className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20"
                   />
                 </div>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="experience" className="text-gray-300">Your Experience</Label>
+                <Label htmlFor="experience" className="text-slate-700">Your Experience</Label>
                 <Textarea
                   id="experience"
                   name="experience"
@@ -142,10 +141,10 @@ const SubmitExperience = () => {
                   placeholder="Write your experience..."
                   value={formData.experience}
                   onChange={handleChange}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20"
                 />
               </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0">
+              <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg">
                 Submit
               </Button>
             </form>

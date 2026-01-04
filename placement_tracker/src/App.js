@@ -18,6 +18,7 @@ import LoginFailurePage from './Auth/LoginFailurePage';
 import GetStartedPage from './Auth/GetStartedPage';
 import ProfilePage from './pages/ProfilePage'; // Added import
 import ResumeBuilder from './pages/ResumeBuilder';
+import ResumePreview from './pages/ResumePreview';
 import JobsPage from './pages/JobsPage';
 import MyApplications from './pages/MyApplications';
 import PrivateRoute from './components/PrivateRoute';
@@ -54,7 +55,8 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/submit" element={<PrivateRoute user={user}><SubmitExperience /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute user={user}><ProfilePage /></PrivateRoute>} />
-        <Route path="/resume" element={<PrivateRoute user={user}><ResumeBuilder /></PrivateRoute>} />
+        <Route path="/resume-builder" element={<PrivateRoute><ResumeBuilder /></PrivateRoute>} />
+        <Route path="/resume/preview" element={<PrivateRoute><ResumePreview /></PrivateRoute>} />
         <Route path="/jobs" element={<PrivateRoute><JobsPage /></PrivateRoute>} />
         <Route path="/my-applications" element={<PrivateRoute><MyApplications /></PrivateRoute>} />
         <Route path="/stats" element={<PrivateRoute><PlacementStats /></PrivateRoute>} />
