@@ -5,7 +5,40 @@
     "role": "Software Engineer",
     "package": "25 LPA",
     "year": 2023,
-    "experience": "The interview process was challenging but rewarding. Focused on data structures and algorithms."
+    "experience": "The interview process was difficult but fair. It focused heavily on data structures, algorithms, and system design.",
+    "difficulty": "Hard",
+    "verdict": "Selected",
+    "rounds": [
+      {
+        "name": "Round 1: Online Assessment",
+        "description": "Hosted on HackerRank. consisted of 2 coding problems (medium-hard) and 10 MCQs on OS/DBMS.",
+        "questions": [
+          "Find the median of two sorted arrays.",
+          "Implement a rate limiter."
+        ]
+      },
+      {
+        "name": "Round 2: Technical Interview 1",
+        "description": "Focussed on Data Structures and Algorithms. The interviewer was friendly and helped hint towards the solution.",
+        "questions": [
+          "Lowest Common Ancestor in a Binary Tree",
+          "Rotated Sorted Array Search"
+        ]
+      },
+      {
+        "name": "Round 3: System Design",
+        "description": "Designed a scalable system for a URL shortener.",
+        "questions": [
+          "Design TinyURL",
+          "How to handle 1M requests per second?"
+        ]
+      }
+    ],
+    "tips": [
+      "Master Dynamic Programming and Graph algorithms.",
+      "Think out loud during the interview.",
+      "Ask clarifying questions before coding."
+    ]
   },
   {
     "name": "Diya Patel",
@@ -13,7 +46,39 @@
     "role": "Product Manager",
     "package": "22 LPA",
     "year": 2023,
-    "experience": "Great experience, the case studies were very insightful. The culture seems amazing."
+    "experience": "Great experience. The process tested my product sense, analytical skills, and cultural fit.",
+    "difficulty": "Medium",
+    "verdict": "Selected",
+    "rounds": [
+      {
+        "name": "Round 1: Online Screening",
+        "description": "Behavioral questions and basic aptitude tests.",
+        "questions": [
+          "Why Microsoft?",
+          "Tell me about a time you failed."
+        ]
+      },
+      {
+        "name": "Round 2: Product Design",
+        "description": "Case study round. Required to design a feature for an existing product.",
+        "questions": [
+          "Design a feature for Instagram specifically for elderly users.",
+          "How would you improve WhatsApp?"
+        ]
+      },
+      {
+        "name": "Round 3: Leadership Principles",
+        "description": "Discussion with a senior manager about values and past experiences.",
+        "questions": [
+          "Describe a conflict with a team member and how you resolved it."
+        ]
+      }
+    ],
+    "tips": [
+      "Understand the company's core values.",
+      "Practice case studies with peers.",
+      "Be user-centric in your answers."
+    ]
   },
   {
     "name": "Rohan Kumar",
@@ -21,62 +86,422 @@
     "role": "Data Scientist",
     "package": "20 LPA",
     "year": 2023,
-    "experience": "The technical rounds were in-depth. Be prepared for questions on machine learning concepts."
+    "experience": "The technical rounds were in-depth. Be prepared for broad questions on stats and machine learning.",
+    "difficulty": "Hard",
+    "verdict": "Selected",
+    "rounds": [
+      {
+        "name": "Round 1: Online Test",
+        "description": "Coding questions + ML basics MCQs.",
+        "questions": [
+          "Reverse a Linked List",
+          "Explain bias-variance tradeoff."
+        ]
+      },
+      {
+        "name": "Round 2: ML Breadth",
+        "description": "Deep dive into various ML algorithms and when to use them.",
+        "questions": [
+          "Explain Random Forest vs Gradient Boosting.",
+          "How does SVM work?"
+        ]
+      },
+      {
+        "name": "Round 3: Bar Raiser",
+        "description": "Behavioral round focusing on Amazon's Leadership Principles.",
+        "questions": [
+          "Tell me about a time you showed customer obsession."
+        ]
+      }
+    ],
+    "tips": [
+      "Know your resume projects inside out.",
+      "Brush up on pure statistics.",
+      "Read about Amazon's Leadership Principles."
+    ]
   },
   {
     "name": "Priya Singh",
     "company": "Flipkart",
-    "role": "Software Development Engineer",
+    "role": "SDE-1",
     "package": "18 LPA",
     "year": 2023,
-    "experience": "The hiring process was smooth. The bar is high, but the team is very supportive."
-  },
-  {
-    "name": "Aditya Verma",
-    "company": "Adobe",
-    "role": "UI/UX Designer",
-    "package": "19 LPA",
-    "year": 2023,
-    "experience": "Portfolio review was the most important part. They look for creativity and a strong design sense."
-  },
-  {
-    "name": "Ananya Gupta",
-    "company": "Oracle",
-    "role": "Database Administrator",
-    "package": "17 LPA",
-    "year": 2022,
-    "experience": "Strong knowledge of SQL and database design is a must. The technical interview was very practical."
+    "experience": "The process was smooth. They focus on problem solving and machine coding.",
+    "difficulty": "Medium",
+    "verdict": "Selected",
+    "rounds": [
+      {
+        "name": "Round 1: Machine Coding",
+        "description": "Given 2 hours to code a working application from scratch.",
+        "questions": [
+          "Design an in-memory splitwise application."
+        ]
+      },
+      {
+        "name": "Round 2: PS/DS",
+        "description": "Standard algorithmic problems.",
+        "questions": [
+          "Trapping Rain Water",
+          "LRU Cache"
+        ]
+      }
+    ],
+    "tips": [
+      "Practice writing clean, modular code.",
+      "Handle edge cases in machine coding.",
+      "focus on code readability."
+    ]
   },
   {
     "name": "Vikram Rathore",
-    "company": "Salesforce",
-    "role": "Cloud Engineer",
-    "package": "21 LPA",
-    "year": 2022,
-    "experience": "Experience with cloud platforms like AWS or Azure is crucial. The interview process was very hands-on."
+    "company": "Tata Motors",
+    "role": "GET (Mechanical)",
+    "package": "8.5 LPA",
+    "year": 2023,
+    "experience": "The interview focussed heavily on core mechanical concepts like Thermodynamics and SOM.",
+    "difficulty": "Medium",
+    "verdict": "Selected",
+    "rounds": [
+      {
+        "name": "Round 1: Online Aptitude & Technical",
+        "description": "Standard aptitude questions (Quants, Verbal) + Core Technical MCQs.",
+        "questions": [
+          "Simple Interest/Compound Interest",
+          "Questions on Rankine Cycle and Gears."
+        ]
+      },
+      {
+        "name": "Round 2: Technical Interview",
+        "description": "Panel of 2. Asked deep questions about my final year project and internship.",
+        "questions": [
+          "Explain the working of a 4-stroke engine breakdown.",
+          "Draw the Stress-Strain curve for mild steel.",
+          "Questions on fluid dynamics."
+        ]
+      },
+      {
+        "name": "Round 3: HR Interview",
+        "description": "General fitment questions. Willingness to relocate to plant locations.",
+        "questions": [
+          "Why Tata Motors?",
+          "Are you okay with working in Jamshedpur/Pune?"
+        ]
+      }
+    ],
+    "tips": [
+      "Be thorough with your final year project.",
+      "Revise TOM, SOM, and Thermodynamics basics.",
+      "Show willingness to learn and adapt to plant life."
+    ]
   },
   {
-    "name": "Isha Sharma",
-    "company": "Zomato",
-    "role": "Marketing Analyst",
-    "package": "15 LPA",
+    "name": "Ananya Gupta",
+    "company": "Texas Instruments",
+    "role": "Analog Design Engineer",
+    "package": "28 LPA",
+    "year": 2023,
+    "experience": "Very tough technical rounds. Deep understanding of RC circuits and MOSFETs is required.",
+    "difficulty": "Hard",
+    "verdict": "Selected",
+    "rounds": [
+      {
+        "name": "Round 1: Written Test",
+        "description": "Circuit analysis problems. Network theory + Digital Electronics.",
+        "questions": [
+          "Solve complex RC circuit transients.",
+          "K-Map simplification."
+        ]
+      },
+      {
+        "name": "Round 2: Technical 1",
+        "description": "Pen and paper round. Designing circuits on the fly.",
+        "questions": [
+          "Design an Op-Amp based amplifier with specific gain.",
+          "Explain CMOS inverter working."
+        ]
+      },
+      {
+        "name": "Round 3: Technical 2",
+        "description": "More focus on Intuition and frequency response.",
+        "questions": [
+          "Draw Bode plots for given transfer functions."
+        ]
+      }
+    ],
+    "tips": [
+      "Sedra & Smith is your bible.",
+      "Practice drawing circuits quickly.",
+      " Understand frequency response thoroughly."
+    ]
+  },
+  {
+    "name": "Rahul Mehta",
+    "company": "Maruti Suzuki",
+    "role": "R&D Engineer",
+    "package": "10 LPA",
     "year": 2022,
-    "experience": "They value a data-driven approach to marketing. The case study was based on real-world scenarios."
+    "experience": "Balanced interview process testing both aptitude and core domain knowledge.",
+    "difficulty": "Medium",
+    "verdict": "Rejected",
+    "rounds": [
+      {
+        "name": "Round 1: Online Test",
+        "description": "Aptitude + Psychometric test.",
+        "questions": [
+          "Pattern matching",
+          "Situational judgment questions."
+        ]
+      },
+      {
+        "name": "Round 2: Technical + HR",
+        "description": "Combined round. Questions on IC Engines and vehicle dynamics.",
+        "questions": [
+          "Explain steering mechanisms.",
+          "What is Ackermann steering?",
+          "Why do you want to join the automobile industry?"
+        ]
+      }
+    ],
+    "tips": [
+      "Read about latest trends in EV and Hybrid technology.",
+      "Brush up on vehicle dynamics.",
+      "Be honest if you don't know an answer."
+    ]
+  },
+  {
+    "name": "Sita Verma",
+    "company": "L&T Construction",
+    "role": "Graduate Engineer Trainee (Civil)",
+    "package": "6.5 LPA",
+    "year": 2023,
+    "experience": "The interview tested practical knowledge of concrete technology and site management.",
+    "difficulty": "Medium",
+    "verdict": "Selected",
+    "rounds": [
+      {
+        "name": "Round 1: Screening Test",
+        "description": "GATE level questions on structures and soil mechanics.",
+        "questions": [
+          "Bending moment diagrams.",
+          "Soil classification properties."
+        ]
+      },
+      {
+        "name": "Round 2: Technical Interview",
+        "description": "Panel interview tailored to resume projects.",
+        "questions": [
+          "Different grades of concrete.",
+          "Explain your site visit experience during internship."
+        ]
+      },
+      {
+        "name": "Round 3: HR Round",
+        "description": "Standard HR questions.",
+        "questions": [
+          "Flexibility with remote site locations.",
+          "Long term career goals."
+        ]
+      }
+    ],
+    "tips": [
+      "Know IS Codes (IS 456) very well.",
+      "Prepare basics of SOM and Structures.",
+      "Highlight any on-site internship experience."
+    ]
+  },
+  {
+    "name": "Arjun Das",
+    "company": "Schneider Electric",
+    "role": "GET (Electrical)",
+    "package": "9 LPA",
+    "year": 2023,
+    "experience": "Good mix of core electrical concepts and managerial questions.",
+    "difficulty": "Medium",
+    "verdict": "Selected",
+    "rounds": [
+      {
+        "name": "Round 1: Gamified Assessment",
+        "description": "Cognitive games and behavioral traits analysis.",
+        "questions": [
+          "Memory games",
+          "Risk-taking assessment."
+        ]
+      },
+      {
+        "name": "Round 2: Technical Interview",
+        "description": "Questions on Power Systems and Switchgear.",
+        "questions": [
+          "Explain different types of circuit breakers.",
+          "Protection schemes for transformers."
+        ]
+      },
+      {
+        "name": "Round 3: Managerial Round",
+        "description": "Scenario based questions.",
+        "questions": [
+          "How would you handle a conflict with a supervisor?",
+          "Explain a project where you led a team."
+        ]
+      }
+    ],
+    "tips": [
+      "Review Power Systems and Machines.",
+      "Demonstrate leadership qualities in your answers.",
+      "Research the company's recent projects."
+    ]
+  },
+  {
+    "name": "Karan Singh",
+    "company": "Siemens",
+    "role": "Software Developer (Core)",
+    "package": "12 LPA",
+    "year": 2022,
+    "experience": "Role required knowledge of C++ and embedded systems concepts.",
+    "difficulty": "Medium",
+    "verdict": "Selected",
+    "rounds": [
+      {
+        "name": "Round 1: Coding Test",
+        "description": "HackerEarth. C++ concepts and small coding snippets.",
+        "questions": [
+          "Pointers and Memory Management",
+          "Linked List implementation in C++."
+        ]
+      },
+      {
+        "name": "Round 2: Technical Interview",
+        "description": "Deep dive into OS and RTOS concepts.",
+        "questions": [
+          "Mutex vs Semaphore.",
+          "Interrupt handling.",
+          "Virtual Memory concepts."
+        ]
+      }
+    ],
+    "tips": [
+      "Strong C/C++ foundation is needed.",
+      "Understand OS concepts like paging and threading.",
+      "Be clear about your project contribution."
+    ]
+  },
+  {
+    "name": "Nisha Reddy",
+    "company": "Deloitte",
+    "role": "Analyst",
+    "package": "7.6 LPA",
+    "year": 2023,
+    "experience": "Focus was on communication skills, aptitude, and basic tech knowledge.",
+    "difficulty": "Easy",
+    "verdict": "Selected",
+    "rounds": [
+      {
+        "name": "Round 1: Aptitude Test",
+        "description": "AMCAT style test. English, Quants, Logical.",
+        "questions": [
+          "Reading comprehension passages.",
+          "Data Interpretation sets."
+        ]
+      },
+      {
+        "name": "Round 2: JAM / Group Discussion",
+        "description": "Just A Minute session. Topic was 'Impact of AI on jobs'.",
+        "questions": [
+          "Speak for 1 minute on the topic."
+        ]
+      },
+      {
+        "name": "Round 3: Versant Test",
+        "description": "Automated spoken English test.",
+        "questions": [
+          "Repeat the sentences.",
+          "Fill in the blanks spoken."
+        ]
+      },
+      {
+        "name": "Round 4: Interview",
+        "description": "Resume based discussion.",
+        "questions": [
+          "Walk me through your resume.",
+          "Why consulting?"
+        ]
+      }
+    ],
+    "tips": [
+      "Excellent communication is key.",
+      "Be confident in the JAM session.",
+      "Know the basics of your core branch subjects."
+    ]
   },
   {
     "name": "Kabir Khan",
-    "company": "Swiggy",
-    "role": "Operations Manager",
-    "package": "16 LPA",
+    "company": "ZS Associates",
+    "role": "Business Technology Analyst",
+    "package": "13.6 LPA",
     "year": 2022,
-    "experience": "Problem-solving and analytical skills are key. The interview process tests your ability to handle pressure."
+    "experience": "Intense process. Case study round was the decider.",
+    "difficulty": "Hard",
+    "verdict": "Rejected",
+    "rounds": [
+      {
+        "name": "Round 1: Online Assessment",
+        "description": "Aptitude + Video Interview.",
+        "questions": [
+          "Guesstimates",
+          "Video response to 'Why ZS?'"
+        ]
+      },
+      {
+        "name": "Round 2: Case Study",
+        "description": "Solved a business problem using data given.",
+        "questions": [
+          "Estimate the market size for electric scooters in India."
+        ]
+      },
+      {
+        "name": "Round 3: EBI + Fit",
+        "description": "Evidence Based Interview. Drilled down into resume points.",
+        "questions": [
+          "Tell me a time you used data to solve a problem."
+        ]
+      }
+    ],
+    "tips": [
+      "Practice Guesstimates.",
+      "Be structured in your problem solving.",
+      "Prepare multiple stories for behavioral questions."
+    ]
   },
   {
-    "name": "Sneha Reddy",
-    "company": "Paytm",
-    "role": "Financial Analyst",
-    "package": "14 LPA",
-    "year": 2022,
-    "experience": "A good understanding of financial modeling and valuation is required. The technical rounds were intense."
+    "name": "Amitabh Roy",
+    "company": "Nvidia",
+    "role": "Hardware Engineer",
+    "package": "22 LPA",
+    "year": 2023,
+    "experience": "Extremely technical. Verilog and Digital Design knowledge must be top notch.",
+    "difficulty": "Hard",
+    "verdict": "Selected",
+    "rounds": [
+      {
+        "name": "Round 1: Screening",
+        "description": "Test on Digital Electronics and Computer Architecture.",
+        "questions": [
+          "Setup and Hold time violations.",
+          "FSM design."
+        ]
+      },
+      {
+        "name": "Round 2: Technical Depth",
+        "description": "Verilog coding and STA analysis.",
+        "questions": [
+          "Write Verilog code for a FIFO.",
+          "Fix timing violations in a given path."
+        ]
+      }
+    ],
+    "tips": [
+      "Master Verilog/SystemVerilog.",
+      "Understand Static Timing Analysis (STA).",
+      "Computer Architecture concepts (Pipelining, Caches) are important."
+    ]
   }
 ]

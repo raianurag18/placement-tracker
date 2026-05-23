@@ -4,7 +4,7 @@ const Application = require('../models/Application');
 const Job = require('../models/Job');
 const { protect } = require('../middleware/authMiddleware');
 
-// POST /api/applications/apply/:jobId - Apply for a job
+// POST /api/c/:collegeSlug/applications/apply/:jobId - Apply for a job
 router.post('/apply/:jobId', protect, async (req, res) => {
     try {
         const jobId = req.params.jobId;
@@ -16,24 +16,28 @@ router.post('/apply/:jobId', protect, async (req, res) => {
             return res.status(404).json({ message: 'Job not found' });
         }
 
-        // Check if user belongs to same institute
-        if (job.institute.toString() !== req.user.institute.toString()) {
-            return res.status(401).json({ message: 'Not authorized for this job' });
+        // Business Logic: Use req.college (from URL) for the authorization check.
+        // This ensures a student from BIT Mesra cannot apply to a BITS Goa job.
+        // ⚠️ INTERVIEW TIP: We prefer req.college over req.user.institute here
+        // because it's resolved from the URL (tamper-proof) not the user token.
+        const studentCollegeId = req.college ? req.college._id : req.user.institute;
+        if (job.institute.toString() !== studentCollegeId.toString()) {
+            return res.status(403).json({ message: 'Not authorized: This job belongs to a different college.' });
         }
 
-        // Check if already applied
+        // Business Logic: Check if student already applied to prevent duplicates
         const existingApplication = await Application.findOne({ job: jobId, student: studentId });
         if (existingApplication) {
             return res.status(400).json({ message: 'You have already applied for this job' });
         }
 
-        // Create Application
+        // Create Application — auto-tagged to this college
         const application = new Application({
             job: jobId,
             student: studentId,
-            institute: req.user.institute,
-            company: job.company, // Auto-fill from Job
-            role: job.role        // Auto-fill from Job
+            institute: studentCollegeId,
+            company: job.company,
+            role: job.role
         });
 
         await application.save();

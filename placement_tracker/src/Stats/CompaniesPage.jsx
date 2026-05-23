@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Building2 } from 'lucide-react';
 
 const CompaniesPage = () => {
   const [companies, setCompanies] = useState([]);
@@ -57,32 +58,40 @@ const CompaniesPage = () => {
   };
 
   return (
-    <div className="min-h-screen text-white">
-      <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-center mb-12">
-          Companies
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-slate-900 mb-4">
+          Partner Companies
         </h1>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {companies.map((company, index) => (
-            <Link to={`/companies/${company}`} key={index}>
-              <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white hover:bg-white/20 transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="text-center">{company}</CardTitle>
-                </CardHeader>
-                <CardContent className="flex justify-center items-center">
-                  {companyLogos[company] ? (
-                    <img src={companyLogos[company]} alt={`${company} logo`} className="h-24 filter brightness-0 invert" /> // Invert logos to white if they are black
-                  ) : (
-                    <div className="h-24 flex items-center justify-center text-xl font-semibold text-gray-400">
-                      {company}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      </main>
+        <p className="text-lg text-slate-500">
+          Explore placement opportunities from our top recruiting partners.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {companies.map((company, index) => (
+          <Link to={`/companies/${company}`} key={index}>
+            <Card className="bg-white border-slate-200 text-slate-900 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-blue-300">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-center text-lg">{company}</CardTitle>
+              </CardHeader>
+              <CardContent className="flex justify-center items-center h-32 pt-0">
+                {companyLogos[company] ? (
+                  <img
+                    src={companyLogos[company]}
+                    alt={`${company} logo`}
+                    className="h-16 max-w-[80%] object-contain opacity-90 hover:opacity-100 transition-opacity"
+                  />
+                ) : (
+                  <div className="h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center">
+                    <Building2 className="h-8 w-8 text-slate-400" />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 };

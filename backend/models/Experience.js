@@ -21,6 +21,26 @@ const ExperienceSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  difficulty: {
+    type: String,
+    enum: ['Easy', 'Medium', 'Hard'],
+    default: 'Medium'
+  },
+  verdict: {
+    type: String,
+    enum: ['Selected', 'Rejected', 'Pending'],
+    default: 'Selected'
+  },
+  rounds: [{
+    name: String, // e.g., "Round 1: Online Assessment"
+    description: String,
+    questions: [String] // Array of specific questions asked
+  }],
+  tips: [String], // Array of tips for future aspirants
+  date: {
+    type: Date,
+    default: Date.now
+  },
   approved: {
     type: Boolean,
     default: false,

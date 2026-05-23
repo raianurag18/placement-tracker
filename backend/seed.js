@@ -3,7 +3,7 @@ const Placement = require('./models/Placement');
 const Experience = require('./models/Experience');
 const placements = require('./data/placements.json');
 const experiences = require('./data/experiences.json');
-require('dotenv').config({ path: './backend/.env' });
+require('dotenv').config();
 
 const seedDB = async () => {
   try {
@@ -13,7 +13,8 @@ const seedDB = async () => {
     });
 
     await Experience.deleteMany({});
-    await Experience.insertMany(experiences);
+    const approvedExperiences = experiences.map(exp => ({ ...exp, approved: true }));
+    await Experience.insertMany(approvedExperiences);
 
     console.log('Database seeded successfully');
     mongoose.connection.close();

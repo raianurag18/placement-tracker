@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'; // Re-trigger compile
+import { Link } from 'react-router-dom';
+import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
+import { ArrowRight, Star, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
-import { Search } from 'lucide-react';
 
 const ExperiencesPage = () => {
   const [experiences, setExperiences] = useState([]);
@@ -14,9 +17,12 @@ const ExperiencesPage = () => {
       .catch((err) => console.error('Error fetching experiences:', err));
   }, []);
 
-  const filteredExperiences = experiences.filter(exp =>
-    exp.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    exp.role.toLowerCase().includes(searchTerm.toLowerCase())
+  // Ensure experiences is an array before filtering
+  const safeExperiences = Array.isArray(experiences) ? experiences : [];
+
+  const filteredExperiences = safeExperiences.filter(exp =>
+    (exp.company?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
+    (exp.role?.toLowerCase().includes(searchTerm.toLowerCase()) || '')
   );
 
   return (
@@ -50,28 +56,48 @@ const ExperiencesPage = () => {
       ) : (
         <div className="grid gap-6 lg:grid-cols-2">
           {filteredExperiences.map((exp) => (
-            <Card key={exp._id} className="bg-white border-slate-200 text-slate-900 hover:border-blue-300 transition-all hover:shadow-md group">
-              <CardHeader>
-                <CardTitle className="text-xl flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="font-bold text-slate-900">{exp.company}</span>
-                    <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 border border-green-200">
+            <Card key={exp._id} className="bg-white border-slate-200 text-slate-900 hover:border-blue-300 transition-all hover:shadow-md group flex flex-col h-full">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-xl font-bold text-slate-900 mb-1">{exp.company}</CardTitle>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                        {exp.role}
+                      </span>
+                      {exp.difficulty && (
+                        <Badge variant="outline" className="text-xs font-normal border-slate-200">
+                          {exp.difficulty}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  {exp.verdict === 'Selected' ? (
+                    <span className="shrink-0 inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700 border border-green-200">
                       Selected
                     </span>
-                  </div>
-                  <span className="text-sm font-medium px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
-                    {exp.role}
-                  </span>
-                </CardTitle>
+                  ) : (
+                    <span className="shrink-0 inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-700 border border-red-200">
+                      Rejected
+                    </span>
+                  )}
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 flex flex-col">
                 <div className="flex items-center text-sm text-slate-500 mb-4 space-x-4">
                   <span className="flex items-center gap-1">👤 <span className="font-medium text-slate-700">{exp.name}</span></span>
                   <span className="flex items-center gap-1">💰 <span className="font-medium text-slate-700">{exp.package}</span></span>
                 </div>
-                <p className="text-slate-600 whitespace-pre-wrap leading-relaxed">
+
+                <p className="text-slate-600 leading-relaxed mb-6 line-clamp-3 flex-1">
                   {exp.experience}
                 </p>
+
+                <Link to={`/experience/${exp._id}`} className="mt-auto">
+                  <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white gap-2 group-hover:translate-x-1 transition-transform">
+                    Read Full Story <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}

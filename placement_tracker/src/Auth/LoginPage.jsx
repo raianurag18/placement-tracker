@@ -201,6 +201,16 @@ const LoginPage = () => {
                 </div>
               )}
 
+              <div className="text-center space-y-2">
+                <Link to="/admin/login" className="block text-sm text-purple-600 hover:text-purple-700 hover:underline font-medium">
+                  Placement Cell Member? Admin Login
+                </Link>
+
+                <Link to="/" className="block text-sm text-slate-500 hover:text-blue-600 hover:underline">
+                  Return to Placement Portal
+                </Link>
+              </div>
+
               <div className="text-xs text-center text-slate-400">
                 Contact your placement cell for credentials.
               </div>

@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Bar } from 'react-chartjs-2';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from "../components/ui/button";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -38,9 +40,11 @@ const BranchStatsPage = () => {
         {
           label: 'Average Package (LPA)',
           data: branchStats.map((stat) => stat.avgPackage),
-          backgroundColor: 'rgba(54, 162, 235, 0.6)',
-          borderColor: 'rgba(54, 162, 235, 1)',
+          backgroundColor: 'rgba(59, 130, 246, 0.8)', // blue-500
+          borderColor: 'rgba(59, 130, 246, 1)',
           borderWidth: 1,
+          borderRadius: 4,
+          maxBarThickness: 50,
         },
       ],
     };
@@ -48,15 +52,17 @@ const BranchStatsPage = () => {
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
-        labels: { color: 'white' }
+        labels: {
+          color: '#475569', // slate-600
+          font: { family: 'Inter, sans-serif' }
+        }
       },
       title: {
-        display: true,
-        text: 'Average Package per Branch',
-        color: 'white'
+        display: false,
       },
     },
     scales: {
@@ -65,59 +71,66 @@ const BranchStatsPage = () => {
         title: {
           display: true,
           text: 'Package (LPA)',
-          color: 'white'
+          color: '#64748b' // slate-500
         },
-        ticks: { color: 'white' },
-        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+        ticks: { color: '#64748b', font: { family: 'Inter, sans-serif' } },
+        grid: { color: 'rgba(226, 232, 240, 0.6)' } // slate-200
       },
       x: {
-        ticks: { color: 'white' },
-        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+        ticks: { color: '#64748b', font: { family: 'Inter, sans-serif' } },
+        grid: { display: false }
       }
     }
   };
 
   return (
-    <div className="min-h-screen text-white">
-      {/* <nav className="bg-card border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/" className="font-bold text-2xl">Placement Tracker</Link>
-            </div>
-          </div>
-        </div>
-      </nav> */}
-      <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-center mb-12">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex items-center space-x-4 mb-8">
+        <Link to="/stats">
+          <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Stats
+          </Button>
+        </Link>
+      </div>
+
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
           Branch-wise Average Package
         </h1>
+        <p className="mt-2 text-lg text-slate-500">
+          Analyze the average performance across engineering branches.
+        </p>
+      </div>
 
-        <div className="mb-12">
-          <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white">
-            <CardContent className="p-6">
-              <Bar data={chartData} options={chartOptions} />
-            </CardContent>
-          </Card>
-        </div>
+      <Card className="bg-white border-slate-200 shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold text-slate-900">Average Package Distribution</CardTitle>
+          <CardDescription>Visual representation of average CTC offered by branch.</CardDescription>
+        </CardHeader>
+        <CardContent className="h-[400px]">
+          <Bar data={chartData} options={chartOptions} />
+        </CardContent>
+      </Card>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {branchStats.map((branch, index) => (
-            <Link to={`/branch/${branch._id}`} key={index}>
-              <Card className="bg-white/10 backdrop-blur-md border-white/10 text-white hover:bg-white/20 transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="text-center">{branch._id}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold text-center">
-                    ₹ {branch.avgPackage.toFixed(2)} LPA
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      </main>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8">
+        {branchStats.map((branch, index) => (
+          <Link to={`/branch/${branch._id}`} key={index}>
+            <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 hover:border-blue-400 group cursor-pointer h-full">
+              <CardHeader className="bg-slate-50 border-b border-slate-100 pb-3">
+                <CardTitle className="text-center text-lg font-semibold text-slate-700 group-hover:text-blue-700 transition-colors">
+                  {branch._id}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <p className="text-center text-sm text-slate-500 uppercase tracking-wide font-medium">Average Package</p>
+                <div className="text-3xl font-bold text-center text-slate-900 mt-1">
+                  ₹ {branch.avgPackage.toFixed(2)} <span className="text-base font-normal text-slate-500">LPA</span>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 };
