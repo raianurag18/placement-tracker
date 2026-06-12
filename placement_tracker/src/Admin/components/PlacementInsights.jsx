@@ -1,20 +1,28 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, ArcElement, BarElement, Tooltip, Legend } from 'chart.js';
 import { Briefcase, TrendingUp, Users, DollarSign, Award } from 'lucide-react';
+import { getAllPlacements } from '../../api/placementApi';
 
 ChartJS.register(CategoryScale, LinearScale, ArcElement, BarElement, Tooltip, Legend);
 
 const PlacementInsights = () => {
+  const { collegeSlug } = useParams();
   const [placements, setPlacements] = useState([]);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements/all`)
-      .then((res) => res.json())
-      .then((data) => setPlacements(data))
-      .catch((err) => console.error('Error fetching placements:', err));
-  }, []);
+    const fetchPlacements = async () => {
+      try {
+        const data = await getAllPlacements(collegeSlug);
+        setPlacements(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error fetching placements:', err.message);
+      }
+    };
+    if (collegeSlug) fetchPlacements();
+  }, [collegeSlug]);
 
   const stats = useMemo(() => {
     if (placements.length === 0) {

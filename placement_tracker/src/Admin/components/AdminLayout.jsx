@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import {
   LayoutDashboard,
@@ -14,11 +14,14 @@ import Logo from '../../components/Logo';
 const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { collegeSlug } = useParams();
+  
+  const basePath = collegeSlug ? `/c/${collegeSlug}/admin` : '/admin';
 
   const handleLogout = () => {
     localStorage.removeItem('isAdminLoggedIn');
     localStorage.removeItem('admin_token');
-    navigate('/admin/login');
+    navigate(collegeSlug ? `/c/${collegeSlug}/admin/login` : '/admin/login');
   };
 
   const isActive = (path) => location.pathname === path;
@@ -42,7 +45,7 @@ const AdminLayout = () => {
       <aside className="fixed top-0 left-0 h-screen w-64 bg-slate-900 border-r border-slate-800 flex flex-col z-50">
         {/* Logo Area */}
         <div className="p-6 border-b border-slate-800/50">
-          <Link to="/admin/dashboard" className="block">
+          <Link to={`${basePath}/dashboard`} className="block">
             <div className="flex items-center gap-2">
               <div className="bg-purple-600/10 p-2 rounded-lg border border-purple-600/20 flex items-center justify-center">
                 <ShieldCheck className="h-6 w-6 text-purple-600" />
@@ -60,14 +63,14 @@ const AdminLayout = () => {
           <div className="px-4 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
             Overview
           </div>
-          <NavItem to="/admin/dashboard" icon={LayoutDashboard} label="Dashboard" />
+          <NavItem to={`${basePath}/dashboard`} icon={LayoutDashboard} label="Dashboard" />
 
           <div className="px-4 mt-6 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
             Management
           </div>
-          <NavItem to="/admin/jobs" icon={Briefcase} label="Placement Drives" />
-          <NavItem to="/admin/placements" icon={Users} label="Placement Records" />
-          <NavItem to="/admin/experiences" icon={FileText} label="Experience Moderation" />
+          <NavItem to={`${basePath}/jobs`} icon={Briefcase} label="Placement Drives" />
+          <NavItem to={`${basePath}/placements`} icon={Users} label="Placement Records" />
+          <NavItem to={`${basePath}/experiences`} icon={FileText} label="Experience Moderation" />
         </div>
 
         {/* User & Logout */}

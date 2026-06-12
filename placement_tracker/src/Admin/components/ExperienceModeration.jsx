@@ -1,72 +1,52 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
-import { CheckCircle, Trash2, Building2, User, FileText, Search, Loader2 } from 'lucide-react';
-import { Input } from "../../components/ui/input";
+import { CheckCircle, Trash2, Building2, User, FileText, Loader2 } from 'lucide-react';
+import { getPendingExperiences, approveExperience, deleteExperience } from '../../api/experienceApi';
 
 const ExperienceModeration = () => {
+  const { collegeSlug } = useParams();
   const [pendingExperiences, setPendingExperiences] = useState([]);
   const [approvedMsg, setApprovedMsg] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('admin_token');
-    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/admin/pending-experiences`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Unauthorized');
-        return res.json();
-      })
-      .then(data => setPendingExperiences(data))
-      .catch(err => console.error('Error fetching pending experiences:', err))
-      .finally(() => setIsLoading(false));
-  }, []);
+    const fetchPending = async () => {
+      try {
+        // getPendingExperiences uses adminFetch, which injects the admin_token
+        const data = await getPendingExperiences(collegeSlug);
+        setPendingExperiences(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error fetching pending experiences:', err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (collegeSlug) fetchPending();
+  }, [collegeSlug]);
 
   const handleApprove = async (id) => {
     try {
-      const token = localStorage.getItem('admin_token');
-      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/admin/approve/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-      });
-
-      if (res.ok) {
-        setPendingExperiences(prev => prev.filter(item => item._id !== id));
-        setApprovedMsg('✅ Experience approved successfully!');
-        setTimeout(() => setApprovedMsg(''), 3000);
-      } else {
-        alert('Failed to approve experience.');
-      }
+      await approveExperience(collegeSlug, id);
+      // Optimistic UI: remove from list immediately after approval
+      setPendingExperiences(prev => prev.filter(item => item._id !== id));
+      setApprovedMsg('✅ Experience approved and published!');
+      setTimeout(() => setApprovedMsg(''), 3000);
     } catch (err) {
-      console.error(err);
-      alert('Server error during approval.');
+      alert(err.message || 'Failed to approve experience.');
     }
   };
 
   const handleDelete = async (id) => {
-    const confirm = window.confirm("Are you sure you want to delete this experience?");
-    if (!confirm) return;
-
+    if (!window.confirm("Are you sure you want to delete this experience?")) return;
     try {
-      const token = localStorage.getItem('admin_token');
-      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/admin/experience/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (res.ok) {
-        setPendingExperiences((prev) => prev.filter((exp) => exp._id !== id));
-      } else {
-        alert('Failed to delete the experience.');
-      }
+      await deleteExperience(collegeSlug, id);
+      setPendingExperiences(prev => prev.filter(exp => exp._id !== id));
     } catch (err) {
-      console.error(err);
-      alert('Server error while deleting.');
+      alert(err.message || 'Failed to delete the experience.');
     }
   };
 
@@ -121,23 +101,15 @@ const ExperienceModeration = () => {
                     CTC: {exp.package} LPA
                   </Badge>
                 </div>
-
                 <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
                   {exp.experience}
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end gap-3 pt-2 pb-6 px-6">
-                <Button
-                  variant="outline"
-                  onClick={() => handleDelete(exp._id)}
-                  className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                >
+                <Button variant="outline" onClick={() => handleDelete(exp._id)} className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700">
                   <Trash2 className="h-4 w-4 mr-2" /> Decline
                 </Button>
-                <Button
-                  onClick={() => handleApprove(exp._id)}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
+                <Button onClick={() => handleApprove(exp._id)} className="bg-green-600 hover:bg-green-700 text-white">
                   <CheckCircle className="h-4 w-4 mr-2" /> Approve & Publish
                 </Button>
               </CardFooter>

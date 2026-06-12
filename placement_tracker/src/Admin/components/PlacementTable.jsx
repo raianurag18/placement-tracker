@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -13,17 +14,25 @@ import { Input } from "../../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
 import AddPlacementForm from './AddPlacementForm';
 import EditPlacementForm from './EditPlacementForm';
+import { getAllPlacements, deletePlacement } from '../../api/placementApi';
 
 const PlacementTable = () => {
+  const { collegeSlug } = useParams();
   const [placements, setPlacements] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements/all`)
-      .then((res) => res.json())
-      .then((data) => setPlacements(data))
-      .catch((err) => console.error('Error fetching placements:', err));
-  }, []);
+    const fetchPlacements = async () => {
+      try {
+        // getAllPlacements fetches /api/c/:slug/placements/all with admin token
+        const data = await getAllPlacements(collegeSlug);
+        setPlacements(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error fetching placements:', err.message);
+      }
+    };
+    if (collegeSlug) fetchPlacements();
+  }, [collegeSlug]);
 
   const handleRecordAdded = (newRecord) => {
     setPlacements((prevPlacements) => [newRecord, ...prevPlacements]);
@@ -38,26 +47,12 @@ const PlacementTable = () => {
   };
 
   const handleDelete = async (id) => {
-    const confirm = window.confirm("Are you sure you want to delete this record? This action cannot be undone.");
-    if (!confirm) return;
-
+    if (!window.confirm("Are you sure you want to delete this record? This action cannot be undone.")) return;
     try {
-      const token = localStorage.getItem('admin_token');
-      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (res.ok) {
-        setPlacements((prev) => prev.filter((p) => p._id !== id));
-      } else {
-        alert('Failed to delete the record.');
-      }
+      await deletePlacement(collegeSlug, id);
+      setPlacements(prev => prev.filter(p => p._id !== id));
     } catch (err) {
-      console.error(err);
-      alert('Server error while deleting.');
+      alert(err.message || 'Failed to delete the record.');
     }
   };
 

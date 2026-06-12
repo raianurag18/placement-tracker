@@ -1,67 +1,52 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Button } from "../../components/ui/button";
-import { Plus, Edit, Trash2, Calendar, DollarSign, ExternalLink } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { Plus, Edit, Trash2, Calendar, DollarSign } from 'lucide-react';
+import { getAdminJobs, createJob, updateJob, deleteJob } from '../../api/jobsApi';
 import JobForm from './JobForm';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
 
 const AdminJobsPage = () => {
-    const { user } = useAuth();
+    const { collegeSlug } = useParams();
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingJob, setEditingJob] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
 
-    // Fetch Jobs
+    // Fetch all jobs for this college's admin panel
     const fetchJobs = async () => {
         try {
-            const token = localStorage.getItem('admin_token'); // Fix: Match AdminLogin key
-            const res = await fetch('/api/jobs', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setJobs(data);
-            }
+            const data = await getAdminJobs(collegeSlug);
+            setJobs(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("Failed to fetch jobs:", error);
+            console.error("Failed to fetch jobs:", error.message);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchJobs();
+        if (collegeSlug) fetchJobs();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [collegeSlug]);
 
-    // Create / Update Handler
+    // Business logic: same handler for create AND update (determined by editingJob state)
     const handleSave = async (formData) => {
         setActionLoading(true);
         try {
-            const token = localStorage.getItem('admin_token');
-            const url = editingJob ? `/api/jobs/${editingJob._id}` : '/api/jobs';
-            const method = editingJob ? 'PUT' : 'POST';
-
-            const res = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(formData)
-            });
-
-            if (res.ok) {
-                await fetchJobs();
-                setIsFormOpen(false);
-                setEditingJob(null);
+            if (editingJob) {
+                // Update existing job using its ID
+                await updateJob(collegeSlug, editingJob._id, formData);
             } else {
-                alert("Failed to save job.");
+                // Create a new job listing
+                await createJob(collegeSlug, formData);
             }
+            await fetchJobs(); // Re-fetch the full list to stay in sync
+            setIsFormOpen(false);
+            setEditingJob(null);
         } catch (error) {
-            console.error("Error saving job:", error);
+            alert(error.message || "Failed to save job.");
         } finally {
             setActionLoading(false);
         }
@@ -70,21 +55,11 @@ const AdminJobsPage = () => {
     // Delete Handler
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this job opening? This cannot be undone.")) return;
-
         try {
-            const token = localStorage.getItem('admin_token');
-            const res = await fetch(`/api/jobs/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (res.ok) {
-                setJobs(prev => prev.filter(job => job._id !== id));
-            } else {
-                alert("Failed to delete job.");
-            }
+            await deleteJob(collegeSlug, id);
+            setJobs(prev => prev.filter(job => job._id !== id));
         } catch (error) {
-            console.error("Error deleting job:", error);
+            alert(error.message || "Failed to delete job.");
         }
     };
 

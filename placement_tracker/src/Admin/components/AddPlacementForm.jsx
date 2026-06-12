@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -10,8 +11,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../../components/ui/sheet";
+import { addPlacement } from '../../api/placementApi';
 
 const AddPlacementForm = ({ onRecordAdded }) => {
+  const { collegeSlug } = useParams();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     companyName: '',
@@ -29,34 +32,19 @@ const AddPlacementForm = ({ onRecordAdded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('admin_token');
-      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData),
+      const newRecord = await addPlacement(collegeSlug, formData);
+      onRecordAdded(newRecord);
+      setFormData({
+        companyName: '',
+        role: '',
+        studentName: '',
+        package: '',
+        branch: '',
+        year: new Date().getFullYear(),
       });
-
-      if (res.ok) {
-        const newRecord = await res.json();
-        onRecordAdded(newRecord);
-        setFormData({
-          companyName: '',
-          role: '',
-          studentName: '',
-          package: '',
-          branch: '',
-          year: new Date().getFullYear(),
-        });
-        setOpen(false);
-      } else {
-        alert('Failed to add record.');
-      }
+      setOpen(false);
     } catch (err) {
-      console.error(err);
-      alert('Server error while adding record.');
+      alert(err.message || 'Failed to add record.');
     }
   };
 
