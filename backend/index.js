@@ -9,6 +9,7 @@ const path = require('path');
 // Middleware Imports
 // ──────────────────────────────────────────────
 const tenantResolver = require('./middleware/tenantResolver');
+const { errorHandler } = require('./middleware/errorHandler');
 
 // ──────────────────────────────────────────────
 // Route Imports
@@ -90,18 +91,9 @@ app.use('/api/c/:collegeSlug/profile', tenantResolver, profileRoutes);
 app.use('/api/c/:collegeSlug/resume', tenantResolver, resumeRoutes);
 
 // ──────────────────────────────────────────────
-// PHASE C — LEGACY ROUTES (Kept for backward compat)
-// These will be removed gradually after frontend is updated
-// DO NOT add new features to these legacy routes
+// Central Error Handler (must be LAST middleware)
 // ──────────────────────────────────────────────
-app.use('/api/placements', placementRoutes);
-app.use('/auth', authRoutes);
-app.use('/api/experiences', experienceRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/profile', profileRoutes);
-app.use('/api/jobs', jobRoutes);
-app.use('/api/applications', applicationRoutes);
-app.use('/api/resume', resumeRoutes);
+app.use(errorHandler);
 
 // ──────────────────────────────────────────────
 // Start Server

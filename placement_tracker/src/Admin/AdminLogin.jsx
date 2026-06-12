@@ -46,12 +46,9 @@ const AdminLogin = () => {
     try {
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-      // Business Logic: Use tenant-aware endpoint if collegeSlug is in the URL.
-      // /c/bitmesra/admin/login → sends to /api/c/bitmesra/admin/login
-      // Legacy /admin/login → sends to /api/admin/login (backward compat)
-      const endpoint = collegeSlug
-        ? `${apiUrl}/api/c/${collegeSlug}/admin/login`
-        : `${apiUrl}/api/admin/login`;
+      // Business Logic: Use tenant-aware endpoint for login.
+      // E.g. /api/c/bitmesra/admin/login. It ensures the admin belongs to THIS college.
+      const endpoint = `${apiUrl}/api/c/${collegeSlug}/admin/login`;
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -179,7 +176,7 @@ const AdminLogin = () => {
             </form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2 text-center">
-            <Link to="/login" className="text-sm text-purple-600 hover:text-purple-700 hover:underline font-medium">
+            <Link to={collegeSlug ? `/c/${collegeSlug}/login` : "/login"} className="text-sm text-purple-600 hover:text-purple-700 hover:underline font-medium">
               Not an Admin? Go to Student Login
             </Link>
             <Link to="/" className="text-sm text-slate-500 hover:text-purple-600 hover:underline">

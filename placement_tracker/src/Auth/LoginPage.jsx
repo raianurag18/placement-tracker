@@ -3,7 +3,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Building2, GraduationCap, BarChart3, ShieldCheck, Mail, Loader2, Eye, EyeOff, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
@@ -17,13 +17,38 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { collegeSlug } = useParams();
 
   useEffect(() => {
-    const savedInstitute = localStorage.getItem('selectedInstitute');
-    if (savedInstitute) {
-      setInstitute(JSON.parse(savedInstitute));
-    }
-  }, []);
+    // ⚠️ INTERVIEW TIP: The URL param (collegeSlug) is the "source of truth".
+    // Priority 1: If a slug is in the URL, fetch fresh data from the backend.
+    //   This handles the case where a user directly types /c/bitmesra/login.
+    // Priority 2: Fall back to localStorage for the legacy /login route (no slug in URL).
+    const loadInstituteData = async () => {
+      if (collegeSlug) {
+        // Fetch college metadata from backend using the URL slug
+        try {
+          const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+          const res = await fetch(`${apiUrl}/api/institutes/${collegeSlug}/meta`);
+          if (res.ok) {
+            const data = await res.json();
+            // data has { name, city, slug, logoUrl }
+            setInstitute(data);
+            return; // Stop here — URL is always more reliable than localStorage
+          }
+        } catch (err) {
+          console.error('Failed to fetch college from URL slug:', err);
+        }
+      }
+      // Fallback: No slug in URL — try reading from localStorage (legacy /login route)
+      const savedInstitute = localStorage.getItem('selectedInstitute');
+      if (savedInstitute) {
+        setInstitute(JSON.parse(savedInstitute));
+      }
+    };
+
+    loadInstituteData();
+  }, [collegeSlug]); // ← Key fix: re-runs whenever the slug in the URL changes
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -36,23 +61,28 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/auth/login`, {
+      // ⚠️ INTERVIEW TIP: We use tenant-aware login endpoint.
+      // E.g. /api/c/bitmesra/auth/login. It ensures the user belongs to THIS college.
+      const endpoint = `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/c/${collegeSlug}/auth/login`;
+
+      const res = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          instituteId: institute.id
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, instituteId: institute.id })
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        login(data);
-        navigate('/');
+        // Pass collegeSlug to login context
+        login({ ...data, collegeSlug: collegeSlug || institute.slug });
+        
+        // Maintain tenant routing context after login
+        if (collegeSlug || institute.slug) {
+            navigate(`/c/${collegeSlug || institute.slug}/dashboard`);
+        } else {
+            navigate('/');
+        }
       } else {
         setError(data.message || 'Login failed');
       }
@@ -202,12 +232,12 @@ const LoginPage = () => {
               )}
 
               <div className="text-center space-y-2">
-                <Link to="/admin/login" className="block text-sm text-purple-600 hover:text-purple-700 hover:underline font-medium">
+                <Link to={collegeSlug ? `/c/${collegeSlug}/admin/login` : "/admin/login"} className="block text-sm text-purple-600 hover:text-purple-700 hover:underline font-medium">
                   Placement Cell Member? Admin Login
                 </Link>
 
                 <Link to="/" className="block text-sm text-slate-500 hover:text-blue-600 hover:underline">
-                  Return to Placement Portal
+                  Return to Global Home
                 </Link>
               </div>
 
