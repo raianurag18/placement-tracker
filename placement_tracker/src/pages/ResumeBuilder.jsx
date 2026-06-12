@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getMyResume, updateResume } from '../api/profileApi';
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -24,6 +25,7 @@ const STEPS = [
 
 const ResumeBuilder = () => {
     const { user } = useAuth();
+    const { collegeSlug } = useParams();
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(1);
     const [loading, setLoading] = useState(true);
@@ -42,41 +44,36 @@ const ResumeBuilder = () => {
         achievements: []
     });
 
-    // Fetch existing resume on mount
+    // Fetch existing resume data on mount
     useEffect(() => {
         const fetchResume = async () => {
             try {
-                const token = user.token || localStorage.getItem('placerra_token');
-                const res = await fetch('/api/resume/my', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data) {
-                        setResumeData(prev => ({ ...prev, ...data }));
-                    } else {
-                        setResumeData(prev => ({
-                            ...prev,
-                            personalInfo: {
-                                ...prev.personalInfo,
-                                firstName: user?.name?.split(' ')[0] || '',
-                                lastName: user?.name?.split(' ')[1] || '',
-                                email: user?.email || '',
-                            }
-                        }));
-                    }
+                // getMyResume fetches from /api/c/:slug/resume/my with token injected
+                const data = await getMyResume(collegeSlug);
+                if (data) {
+                    setResumeData(prev => ({ ...prev, ...data }));
+                } else {
+                    // Pre-fill with logged-in user's basic info
+                    setResumeData(prev => ({
+                        ...prev,
+                        personalInfo: {
+                            ...prev.personalInfo,
+                            firstName: user?.name?.split(' ')[0] || '',
+                            lastName: user?.name?.split(' ')[1] || '',
+                            email: user?.email || '',
+                        }
+                    }));
                 }
             } catch (error) {
-                console.error("Failed to fetch resume:", error);
+                console.error("Failed to fetch resume:", error.message);
             } finally {
                 setLoading(false);
             }
         };
 
-        if (user) fetchResume();
+        if (user && collegeSlug) fetchResume();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]);
+    }, [user, collegeSlug]);
 
     // --- HANDLERS ---
     // (Handlers remain unchanged, logic is solid)
@@ -154,26 +151,17 @@ const ResumeBuilder = () => {
     const saveResume = async () => {
         setSaving(true);
         try {
-            const token = user.token || localStorage.getItem('placerra_token');
+            // Clean out empty education/experience entries before saving
             const cleanedData = {
                 ...resumeData,
                 education: resumeData.education.filter(edu => edu.institute && edu.institute.trim() !== ''),
                 experience: resumeData.experience.filter(exp => exp.company && exp.company.trim() !== '')
             };
-
-            const res = await fetch('/api/resume/update', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(cleanedData)
-            });
-
-            if (!res.ok) alert("Failed to save progress.");
+            // updateResume sends PUT to /api/c/:slug/resume/update
+            await updateResume(collegeSlug, cleanedData);
         } catch (error) {
-            console.error("Save failed:", error);
-            alert("Error saving resume.");
+            console.error("Save failed:", error.message);
+            alert("Error saving resume: " + error.message);
         } finally {
             setSaving(false);
         }
@@ -183,9 +171,10 @@ const ResumeBuilder = () => {
         await saveResume();
         if (activeStep < STEPS.length) {
             setActiveStep(prev => prev + 1);
-            window.scrollTo(0, 0); // Scroll to top on step change
+            window.scrollTo(0, 0);
         } else {
-            navigate('/resume/preview');
+            // Tenant-aware navigation: go to /c/:slug/resume/preview
+            navigate(`/c/${collegeSlug}/resume/preview`);
         }
     };
 

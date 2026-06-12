@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -7,158 +7,105 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
+    Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from "../components/ui/sheet";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "../components/ui/select";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
 import { Loader2, Briefcase, Plus, MoreHorizontal, Pencil, Trash } from 'lucide-react';
+import {
+    getMyApplications,
+    createApplication,
+    updateApplication,
+    deleteApplication
+} from '../api/jobsApi';
 
 const COLUMN_STATUSES = ['Applied', 'Assessment', 'Interview', 'Selected', 'Rejected'];
 
 const MyApplications = () => {
-    const { user } = useAuth();
+    const { collegeSlug } = useParams();
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Sheet State
+    // Sheet (side drawer) state
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [editingApp, setEditingApp] = useState(null);
     const [formData, setFormData] = useState({
-        company: '',
-        role: '',
-        status: 'Applied',
-        notes: ''
+        company: '', role: '', status: 'Applied', notes: ''
     });
 
     const fetchApplications = async () => {
         try {
-            const token = user.token || localStorage.getItem('placerra_token');
-            const res = await fetch('/api/applications/my', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setApplications(data);
-            }
+            const data = await getMyApplications(collegeSlug);
+            setApplications(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("Failed to fetch applications", error);
+            console.error("Failed to fetch applications:", error.message);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchApplications();
+        if (collegeSlug) fetchApplications();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]);
+    }, [collegeSlug]);
 
-    // Open Sheet for Create
     const openCreate = () => {
         setEditingApp(null);
         setFormData({ company: '', role: '', status: 'Applied', notes: '' });
         setIsSheetOpen(true);
     };
 
-    // Open Sheet for Edit
     const openEdit = (app) => {
         setEditingApp(app);
-        setFormData({
-            company: app.company,
-            role: app.role,
-            status: app.status,
-            notes: app.notes || ''
-        });
+        setFormData({ company: app.company, role: app.role, status: app.status, notes: app.notes || '' });
         setIsSheetOpen(true);
     };
 
-    // Handle Form Submit (Create or Update)
+    // Business logic: create OR update depending on whether editingApp is set
     const handleSave = async (e) => {
         e.preventDefault();
-        const token = user.token || localStorage.getItem('placerra_token');
-
         try {
-            let res;
             if (editingApp) {
-                // UPDATE
-                res = await fetch(`/api/applications/${editingApp._id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(formData)
-                });
+                // Update existing application
+                await updateApplication(collegeSlug, editingApp._id, formData);
             } else {
-                // CREATE
-                res = await fetch('/api/applications/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(formData)
-                });
+                // Create new application
+                await createApplication(collegeSlug, formData);
             }
-
-            if (res.ok) {
-                fetchApplications(); // Refresh board
-                setIsSheetOpen(false);
-            } else {
-                alert("Failed to save application");
-            }
+            await fetchApplications(); // Refresh the board after save
+            setIsSheetOpen(false);
         } catch (err) {
-            console.error(err);
-            alert("Error saving application");
+            alert(err.message || "Failed to save application");
         }
     };
 
-    // Handle Delete
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this application?")) return;
-
         try {
-            const token = user.token || localStorage.getItem('placerra_token');
-            const res = await fetch(`/api/applications/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (res.ok) {
-                setApplications(apps => apps.filter(a => a._id !== id));
-            } else {
-                alert("Failed to delete");
-            }
+            await deleteApplication(collegeSlug, id);
+            // Optimistic UI: remove immediately without re-fetching
+            setApplications(apps => apps.filter(a => a._id !== id));
         } catch (err) {
-            console.error(err);
+            alert(err.message || "Failed to delete application");
         }
     };
 
-    // Optimistic Status Update (Drag/Button flow)
+    // ⚠️ INTERVIEW TIP: This is "optimistic updating" — we update the UI first,
+    // then send the API request. If it fails, we roll back to the old state.
+    // This makes the UI feel instantaneous to the user.
     const quickUpdateStatus = async (id, newStatus) => {
         const oldApps = [...applications];
         setApplications(apps => apps.map(app =>
             app._id === id ? { ...app, status: newStatus } : app
         ));
-
         try {
-            const token = user.token || localStorage.getItem('placerra_token');
-            const res = await fetch(`/api/applications/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ status: newStatus })
-            });
-            if (!res.ok) throw new Error('Failed to update');
+            await updateApplication(collegeSlug, id, { status: newStatus });
         } catch (error) {
-            setApplications(oldApps);
+            setApplications(oldApps); // Roll back on failure
             alert("Failed to update status");
         }
     };
@@ -218,8 +165,6 @@ const MyApplications = () => {
                                                 <div className="text-xs text-slate-400 mb-4">
                                                     Applied: {new Date(app.appliedAt).toLocaleDateString()}
                                                 </div>
-
-                                                {/* Actions Footer */}
                                                 <div className="flex justify-between items-center mt-2 pt-3 border-t border-slate-100">
                                                     {status !== 'Applied' && (
                                                         <button
@@ -229,7 +174,6 @@ const MyApplications = () => {
                                                             &larr; Prev
                                                         </button>
                                                     )}
-
                                                     {status !== 'Rejected' && status !== 'Selected' && (
                                                         <button
                                                             onClick={() => quickUpdateStatus(app._id, COLUMN_STATUSES[COLUMN_STATUSES.indexOf(status) + 1])}
@@ -239,8 +183,6 @@ const MyApplications = () => {
                                                         </button>
                                                     )}
                                                 </div>
-
-                                                {/* Dropdown Menu */}
                                                 <div className="absolute top-4 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
@@ -279,32 +221,15 @@ const MyApplications = () => {
                         <form onSubmit={handleSave} className="space-y-6 mt-6">
                             <div className="space-y-2">
                                 <Label htmlFor="company" className="text-slate-700">Company Name</Label>
-                                <Input
-                                    id="company"
-                                    value={formData.company}
-                                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                                    required
-                                    className="bg-white border-slate-200 focus:ring-blue-500 text-slate-900"
-                                    placeholder="e.g. Google"
-                                />
+                                <Input id="company" value={formData.company} onChange={(e) => setFormData({ ...formData, company: e.target.value })} required className="bg-white border-slate-200 text-slate-900" placeholder="e.g. Google" />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="role" className="text-slate-700">Role / Position</Label>
-                                <Input
-                                    id="role"
-                                    value={formData.role}
-                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                    required
-                                    className="bg-white border-slate-200 focus:ring-blue-500 text-slate-900"
-                                    placeholder="e.g. SDE Intern"
-                                />
+                                <Input id="role" value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })} required className="bg-white border-slate-200 text-slate-900" placeholder="e.g. SDE Intern" />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="status" className="text-slate-700">Current Status</Label>
-                                <Select
-                                    value={formData.status}
-                                    onValueChange={(val) => setFormData({ ...formData, status: val })}
-                                >
+                                <Select value={formData.status} onValueChange={(val) => setFormData({ ...formData, status: val })}>
                                     <SelectTrigger className="bg-white border-slate-200 text-slate-900">
                                         <SelectValue placeholder="Select Status" />
                                     </SelectTrigger>
@@ -317,18 +242,10 @@ const MyApplications = () => {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="notes" className="text-slate-700">Notes (Optional)</Label>
-                                <Textarea
-                                    id="notes"
-                                    value={formData.notes}
-                                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                    className="bg-white border-slate-200 focus:ring-blue-500 min-h-[100px] text-slate-900"
-                                    placeholder="Add interview dates, contact details, or other notes..."
-                                />
+                                <Textarea id="notes" value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} className="bg-white border-slate-200 text-slate-900 min-h-[100px]" placeholder="Add interview dates, contact details, or other notes..." />
                             </div>
                             <div className="flex justify-end gap-3 pt-4">
-                                <Button type="button" variant="ghost" onClick={() => setIsSheetOpen(false)} className="text-slate-500 hover:text-slate-900">
-                                    Cancel
-                                </Button>
+                                <Button type="button" variant="ghost" onClick={() => setIsSheetOpen(false)} className="text-slate-500 hover:text-slate-900">Cancel</Button>
                                 <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
                                     {editingApp ? 'Save Changes' : 'Create Application'}
                                 </Button>

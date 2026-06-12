@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Building2, Calendar, Banknote, GraduationCap, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { checkApplicationStatus, applyToJob } from '../api/jobsApi';
 
+// ⚠️ INTERVIEW TIP: JobCard uses useParams() directly even though it's a
+// reusable component — not a page. This works because it's always rendered
+// inside a /c/:collegeSlug/* route, so React Router provides the slug.
+// This avoids "prop drilling" the slug from JobsPage → JobCard.
 const JobCard = ({ job }) => {
-    const { user } = useAuth();
+    const { collegeSlug } = useParams();
     const [hasApplied, setHasApplied] = useState(false);
     const [loading, setLoading] = useState(false);
     const [checking, setChecking] = useState(true);
@@ -20,52 +25,35 @@ const JobCard = ({ job }) => {
 
     const isExpired = new Date(job.deadline) < new Date();
 
+    // On mount: check if the student already applied to this job
+    // This determines whether to show "Apply" or "Applied" button
     useEffect(() => {
         const checkStatus = async () => {
-            if (!user) return;
+            if (!collegeSlug) return;
             try {
-                const response = await fetch(`/api/applications/check/${job._id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${user.token || localStorage.getItem('placerra_token')}`
-                    }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setHasApplied(data.hasApplied);
-                }
+                const data = await checkApplicationStatus(collegeSlug, job._id);
+                setHasApplied(data.hasApplied);
             } catch (error) {
-                console.error("Failed to check application status", error);
+                // A 401 here means the user is not logged in — that's ok, just show Apply
+                console.error("Failed to check application status:", error.message);
             } finally {
                 setChecking(false);
             }
         };
         checkStatus();
-    }, [job._id, user]);
+    }, [job._id, collegeSlug]);
 
     const handleApply = async () => {
         if (!window.confirm(`Apply to ${job.company} for ${job.role}?`)) return;
 
         setLoading(true);
         try {
-            const response = await fetch(`/api/applications/apply/${job._id}`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${user.token || localStorage.getItem('placerra_token')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                setHasApplied(true);
-                alert('Application Successful!');
-            } else {
-                alert(data.message || 'Application Failed');
-            }
-        } catch (error) {
-            console.error("Apply error", error);
-            alert('Failed to connect to server');
+            // applyToJob sends POST to /api/c/:slug/applications/apply/:jobId
+            await applyToJob(collegeSlug, job._id);
+            setHasApplied(true);
+            alert('Application Successful!');
+        } catch (err) {
+            alert(err.message || 'Application Failed. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -76,7 +64,6 @@ const JobCard = ({ job }) => {
             <CardHeader className="space-y-4">
                 <div className="flex justify-between items-start">
                     <div className="flex items-center space-x-4">
-                        {/* Logo Placeholder or Image */}
                         <div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center border border-blue-100 group-hover:border-blue-200 transition-colors">
                             {job.logo ? (
                                 <img src={job.logo} alt={job.company} className="h-8 w-8 object-contain" />
@@ -91,7 +78,6 @@ const JobCard = ({ job }) => {
                             <div className="text-slate-500 font-medium">{job.company}</div>
                         </div>
                     </div>
-                    {/* Status Badge */}
                     <div className={`px-2 py-1 rounded text-xs font-semibold ${isExpired ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}>
                         {isExpired ? 'Closed' : 'Active'}
                     </div>
@@ -99,7 +85,6 @@ const JobCard = ({ job }) => {
             </CardHeader>
 
             <CardContent className="space-y-4">
-                {/* Key Details Grid */}
                 <div className="grid grid-cols-2 gap-4">
                     <div className="flex items-center space-x-2 text-slate-600">
                         <Banknote className="h-4 w-4 text-slate-400" />
@@ -115,7 +100,6 @@ const JobCard = ({ job }) => {
                     </div>
                 </div>
 
-                {/* Short Description */}
                 {job.description && (
                     <p className="text-sm text-slate-500 line-clamp-2">
                         {job.description}
@@ -139,15 +123,11 @@ const JobCard = ({ job }) => {
                     ) : isExpired ? (
                         'Applications Closed'
                     ) : hasApplied ? (
-                        <>
-                            <CheckCircle2 className="mr-2 h-4 w-4" /> Applied
-                        </>
+                        <><CheckCircle2 className="mr-2 h-4 w-4" /> Applied</>
                     ) : loading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                        <>
-                            Apply Now <ArrowRight className="ml-2 h-4 w-4" />
-                        </>
+                        <>Apply Now <ArrowRight className="ml-2 h-4 w-4" /></>
                     )}
                 </Button>
             </CardFooter>

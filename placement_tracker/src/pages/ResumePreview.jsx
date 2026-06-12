@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Button } from "../components/ui/button";
 import { Loader2, Printer, ArrowLeft, Mail, Phone, Linkedin, Github, Globe, FileEdit, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getMyResume } from '../api/profileApi';
 
 const ResumePreview = () => {
     const { user } = useAuth();
+    const { collegeSlug } = useParams();
     const navigate = useNavigate();
     const [resumeData, setResumeData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -13,23 +15,17 @@ const ResumePreview = () => {
     useEffect(() => {
         const fetchResume = async () => {
             try {
-                const token = user.token || localStorage.getItem('placerra_token');
-                const res = await fetch('/api/resume/my', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    setResumeData(data);
-                }
+                const data = await getMyResume(collegeSlug);
+                setResumeData(data);
             } catch (error) {
-                console.error("Failed to fetch resume:", error);
+                console.error("Failed to fetch resume:", error.message);
             } finally {
                 setLoading(false);
             }
         };
 
-        if (user) fetchResume();
-    }, [user]);
+        if (user && collegeSlug) fetchResume();
+    }, [user, collegeSlug]);
 
     const handlePrint = () => {
         window.print();
@@ -45,7 +41,7 @@ const ResumePreview = () => {
         <div className="flex flex-col items-center justify-center h-screen bg-slate-50 text-slate-900">
             <h2 className="text-2xl font-bold mb-2">No Resume Found</h2>
             <p className="text-slate-500 mb-6">You haven't created a resume yet.</p>
-            <Button onClick={() => navigate('/resume-builder')} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => navigate(`/c/${collegeSlug}/resume-builder`)} className="bg-blue-600 hover:bg-blue-700">
                 <FileEdit className="mr-2 h-4 w-4" /> Go to Resume Builder
             </Button>
         </div>
@@ -58,7 +54,7 @@ const ResumePreview = () => {
 
             {/* Toolbar - Sticky Top for better UX */}
             <div className="max-w-[210mm] mx-auto mb-6 flex justify-between items-center print:hidden sticky top-4 z-50 bg-slate-900/90 backdrop-blur-md p-4 rounded-xl border border-slate-700 shadow-xl">
-                <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800" onClick={() => navigate('/resume-builder')}>
+                <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800" onClick={() => navigate(`/c/${collegeSlug}/resume-builder`)}>
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back to Editor
                 </Button>
 
