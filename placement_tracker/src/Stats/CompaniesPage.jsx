@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Building2 } from 'lucide-react';
+import { getCompaniesList } from '../api/placementApi';
 
 const CompaniesPage = () => {
+  const { collegeSlug } = useParams();
   const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements/companies`)
-      .then((res) => res.json())
-      .then((data) => setCompanies(data))
-      .catch((err) => console.error('Error fetching companies:', err));
-  }, []);
+    const fetchCompanies = async () => {
+      try {
+        const data = await getCompaniesList(collegeSlug);
+        setCompanies(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error fetching companies:', err.message);
+      }
+    };
+    if (collegeSlug) fetchCompanies();
+  }, [collegeSlug]);
 
   const companyLogos = {
     Google: '/logos/google.png',
@@ -70,7 +77,7 @@ const CompaniesPage = () => {
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {companies.map((company, index) => (
-          <Link to={`/companies/${company}`} key={index}>
+          <Link to={`company/${encodeURIComponent(company)}`} key={index}>
             <Card className="bg-white border-slate-200 text-slate-900 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-blue-300">
               <CardHeader className="pb-2">
                 <CardTitle className="text-center text-lg">{company}</CardTitle>

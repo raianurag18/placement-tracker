@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Bar } from 'react-chartjs-2';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from "../components/ui/button";
+import { getBranchStats } from '../api/placementApi';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -24,14 +25,20 @@ ChartJS.register(
 );
 
 const BranchStatsPage = () => {
+  const { collegeSlug } = useParams();
   const [branchStats, setBranchStats] = useState([]);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements/stats/branch`)
-      .then((res) => res.json())
-      .then((data) => setBranchStats(data))
-      .catch((err) => console.error('Error fetching branch stats:', err));
-  }, []);
+    const fetchData = async () => {
+      try {
+        const data = await getBranchStats(collegeSlug);
+        setBranchStats(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error fetching branch stats:', err.message);
+      }
+    };
+    if (collegeSlug) fetchData();
+  }, [collegeSlug]);
 
   const chartData = useMemo(() => {
     return {
@@ -86,7 +93,7 @@ const BranchStatsPage = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center space-x-4 mb-8">
-        <Link to="/stats">
+        <Link to="../stats">
           <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
             <ArrowLeft className="h-4 w-4 mr-2" /> Back to Stats
           </Button>
@@ -114,7 +121,7 @@ const BranchStatsPage = () => {
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8">
         {branchStats.map((branch, index) => (
-          <Link to={`/branch/${branch._id}`} key={index}>
+          <Link to={`branch/${branch._id}`} key={index}>
             <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 hover:border-blue-400 group cursor-pointer h-full">
               <CardHeader className="bg-slate-50 border-b border-slate-100 pb-3">
                 <CardTitle className="text-center text-lg font-semibold text-slate-700 group-hover:text-blue-700 transition-colors">

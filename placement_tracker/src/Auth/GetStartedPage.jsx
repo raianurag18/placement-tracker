@@ -64,12 +64,17 @@ const GetStartedPage = () => {
             return;
         }
 
-        // Save to local storage
+        // Save to local storage WITH SLUG
         localStorage.setItem('selectedInstitute', JSON.stringify({
             name: selectedInstitute.name,
             city: selectedInstitute.city,
-            id: selectedInstitute._id
+            id: selectedInstitute._id,
+            slug: selectedInstitute.slug // REQUIRED for SaaS routing
         }));
+        // Store slug separately for easy access
+        if (selectedInstitute.slug) {
+            localStorage.setItem('placerra_college_slug', selectedInstitute.slug);
+        }
         handleNext();
     };
 
@@ -233,7 +238,7 @@ const GetStartedPage = () => {
                                         <Button
                                             className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
                                             size="lg"
-                                            onClick={() => navigate('/login')}
+                                            onClick={() => navigate(selectedInstitute?.slug ? `/c/${selectedInstitute.slug}/login` : '/login')}
                                         >
                                             Go to Student Login
                                         </Button>
@@ -241,7 +246,11 @@ const GetStartedPage = () => {
                                 ) : (
                                     <div className="space-y-4">
                                         <p className="text-sm text-slate-500">Access the administrative dashboard.</p>
-                                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg" size="lg" onClick={() => navigate('/admin/login')}>
+                                        <Button 
+                                            className="w-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg" 
+                                            size="lg" 
+                                            onClick={() => navigate(selectedInstitute?.slug ? `/c/${selectedInstitute.slug}/admin/login` : '/admin/login')}
+                                        >
                                             Go to Admin Login
                                         </Button>
                                     </div>

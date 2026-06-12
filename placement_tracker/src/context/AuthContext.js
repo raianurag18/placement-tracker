@@ -7,7 +7,12 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
         try {
             const stored = localStorage.getItem('placerra_user');
-            return stored ? JSON.parse(stored) : null;
+            const parsed = stored ? JSON.parse(stored) : null;
+            // Ensure collegeSlug is picked up from user object if it exists
+            if (parsed && !parsed.collegeSlug) {
+                parsed.collegeSlug = localStorage.getItem('placerra_college_slug');
+            }
+            return parsed;
         } catch (err) {
             return null;
         }
@@ -24,26 +29,33 @@ export const AuthProvider = ({ children }) => {
         // Handle structure: if userData has user & token properties
         const userToSave = userData.user ? userData.user : userData;
         const tokenToSave = userData.token || userData.token; // Redundant but clear
+        const slugToSave = userData.collegeSlug || localStorage.getItem('placerra_college_slug');
 
-        // Merge token into user object for convenience, or keep separate. 
-        // Best practice: keep separate but for this context, let's attach result.
-
-        const finalUser = { ...userToSave, token: userData.token };
+        const finalUser = { ...userToSave, token: tokenToSave, collegeSlug: slugToSave };
 
         setUser(finalUser);
         localStorage.setItem('placerra_user', JSON.stringify(finalUser));
-        if (userData.token) {
-            localStorage.setItem('placerra_token', userData.token);
+        if (tokenToSave) {
+            localStorage.setItem('placerra_token', tokenToSave);
+        }
+        if (slugToSave) {
+            localStorage.setItem('placerra_college_slug', slugToSave);
         }
     };
 
     // 4. Logout: Clear State AND LocalStorage
     const logout = () => {
+        const slug = user?.collegeSlug || localStorage.getItem('placerra_college_slug');
         setUser(null);
         localStorage.removeItem('placerra_user');
         localStorage.removeItem('placerra_token');
-        // Optional: Notify server to kill cookie too
-        fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/auth/logout`, { method: 'POST' });
+        
+        // Notify server to kill cookie (using tenant endpoint if available)
+        if (slug) {
+            fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/c/${slug}/auth/logout`, { method: 'POST' }).catch(() => {});
+        } else {
+            fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/auth/logout`, { method: 'POST' }).catch(() => {});
+        }
     };
 
     return (

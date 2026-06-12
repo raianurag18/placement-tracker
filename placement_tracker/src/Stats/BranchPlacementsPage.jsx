@@ -3,22 +3,28 @@ import { useParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from "../components/ui/button";
 import { ArrowLeft, Building2, Calendar } from 'lucide-react';
+import { getBranchPlacements } from '../api/placementApi';
 
 const BranchPlacementsPage = () => {
-  const { branchName } = useParams();
+  const { collegeSlug, branchName } = useParams();
   const [placements, setPlacements] = useState([]);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements/branch/${branchName}`)
-      .then((res) => res.json())
-      .then((data) => setPlacements(data))
-      .catch((err) => console.error('Error fetching placements:', err));
-  }, [branchName]);
+    const fetchData = async () => {
+      try {
+        const data = await getBranchPlacements(collegeSlug, branchName);
+        setPlacements(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error fetching placements:', err.message);
+      }
+    };
+    if (collegeSlug && branchName) fetchData();
+  }, [collegeSlug, branchName]);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 min-h-screen">
       <div className="flex items-center space-x-4 mb-4">
-        <Link to="/branch-stats">
+        <Link to="../branch-stats">
           <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
             <ArrowLeft className="h-4 w-4 mr-2" /> Back to Branch Stats
           </Button>

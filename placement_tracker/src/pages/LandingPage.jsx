@@ -20,10 +20,13 @@ const LandingPage = () => {
 
     const handleInstituteSelect = (institute) => {
         setSelectedInstitute(institute);
+        // Business Logic: We save the slug here because it is the URL identifier
+        // for the tenant. Without it, we cannot build /c/:slug/login routes.
         localStorage.setItem('selectedInstitute', JSON.stringify({
             name: institute.name,
             city: institute.city,
-            id: institute._id
+            id: institute._id,
+            slug: institute.slug  // ✅ Critical: needed to build tenant-specific routes
         }));
     };
 
@@ -98,12 +101,14 @@ const LandingPage = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <Link to="/admin/login">
+                                {/* ✅ FIX: Use dynamic tenant slug instead of legacy /admin/login */}
+                                <Link to={`/c/${selectedInstitute.slug}/admin/login`}>
                                     <Button variant="ghost" className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 hidden sm:flex">
                                         <ShieldCheck className="h-4 w-4 mr-2" /> Admin
                                     </Button>
                                 </Link>
-                                <Link to="/login">
+                                {/* ✅ FIX: Use dynamic tenant slug instead of legacy /login */}
+                                <Link to={`/c/${selectedInstitute.slug}/login`}>
                                     <Button className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-600/20">
                                         Student Login <ArrowRight className="h-4 w-4 ml-2" />
                                     </Button>
@@ -125,12 +130,14 @@ const LandingPage = () => {
                                     Access real-time placement insights, track your applications, and prepare for interviews withverified experiences from {selectedInstitute.name} seniors.
                                 </p>
                                 <div className="flex gap-4 pt-4">
-                                    <Link to="/login">
+                                    {/* ✅ FIX: Navigates to /c/iitbombay/login (or whichever college slug) */}
+                                    <Link to={`/c/${selectedInstitute.slug}/login`}>
                                         <Button size="lg" className="h-14 px-8 text-lg bg-slate-900 text-white hover:bg-slate-800">
                                             Access Dashboard
                                         </Button>
                                     </Link>
-                                    <Link to="/admin/login">
+                                    {/* ✅ FIX: Navigates to /c/iitbombay/admin/login */}
+                                    <Link to={`/c/${selectedInstitute.slug}/admin/login`}>
                                         <Button size="lg" variant="outline" className="h-14 px-8 text-lg sm:hidden">
                                             Admin Portal
                                         </Button>

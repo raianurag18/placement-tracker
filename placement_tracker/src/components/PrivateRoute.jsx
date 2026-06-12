@@ -4,13 +4,17 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const PrivateRoute = ({ children }) => {
-  const { user } = useAuth();
+    const { user, isLoading } = useAuth();
+    
+    // We try to get the slug from the AuthContext or LocalStorage
+    const collegeSlug = user?.collegeSlug || localStorage.getItem('placerra_college_slug');
 
-  // The main loading state is now handled in App.js.
-  // This component will be rendered only after the initial user check is complete.
+    if (isLoading) {
+        return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    }
 
-  // If user is null, it means they are not logged in, so we navigate to our local login page.
-  return user ? children : <Navigate to="/login" />;
+    // If there's a slug, send them to the tenant login, otherwise global login
+    return user ? children : <Navigate to={collegeSlug ? `/c/${collegeSlug}/login` : "/login"} replace />;
 };
 
 export default PrivateRoute;

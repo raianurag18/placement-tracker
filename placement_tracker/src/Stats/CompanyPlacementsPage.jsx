@@ -3,22 +3,29 @@ import { useParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from "../components/ui/button";
 import { ArrowLeft, Briefcase, Calendar, GraduationCap } from 'lucide-react';
+import { getCompanyPlacements } from '../api/placementApi';
 
 const CompanyPlacementsPage = () => {
-  const { companyName } = useParams();
+  // Both :collegeSlug and :companyName come from the URL
+  const { collegeSlug, companyName } = useParams();
   const [placements, setPlacements] = useState([]);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements/companies/${companyName}`)
-      .then((res) => res.json())
-      .then((data) => setPlacements(data))
-      .catch((err) => console.error('Error fetching placements:', err));
-  }, [companyName]);
+    const fetchData = async () => {
+      try {
+        const data = await getCompanyPlacements(collegeSlug, companyName);
+        setPlacements(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error fetching placements:', err.message);
+      }
+    };
+    if (collegeSlug && companyName) fetchData();
+  }, [collegeSlug, companyName]);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 min-h-screen">
       <div className="flex items-center space-x-4 mb-4">
-        <Link to="/companies">
+        <Link to="../companies">
           <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
             <ArrowLeft className="h-4 w-4 mr-2" /> Back to Companies
           </Button>

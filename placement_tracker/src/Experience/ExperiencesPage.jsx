@@ -1,26 +1,46 @@
-import React, { useEffect, useState } from 'react'; // Re-trigger compile
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { ArrowRight, Star, Search } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
+import { getExperiences } from '../api/experienceApi';
 
+// ⚠️ INTERVIEW TIP: useParams() here gives us the :collegeSlug from the URL.
+// Since this component renders inside /c/:collegeSlug/experiences,
+// React Router automatically provides the slug value.
 const ExperiencesPage = () => {
+  const { collegeSlug } = useParams();
   const [experiences, setExperiences] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/experiences`)
-      .then((res) => res.json())
-      .then((data) => setExperiences(data))
-      .catch((err) => console.error('Error fetching experiences:', err));
-  }, []);
+    if (!collegeSlug) return;
 
-  // Ensure experiences is an array before filtering
-  const safeExperiences = Array.isArray(experiences) ? experiences : [];
+    // AbortController: cancels the request if the user navigates away quickly.
+    // This prevents "can't update state on unmounted component" errors.
+    const controller = new AbortController();
 
-  const filteredExperiences = safeExperiences.filter(exp =>
+    const fetchData = async () => {
+      try {
+        const data = await getExperiences(collegeSlug, controller.signal);
+        setExperiences(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching experiences:', err.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+    return () => controller.abort(); // Cleanup on unmount
+  }, [collegeSlug]);
+
+  const filteredExperiences = experiences.filter(exp =>
     (exp.company?.toLowerCase().includes(searchTerm.toLowerCase()) || '') ||
     (exp.role?.toLowerCase().includes(searchTerm.toLowerCase()) || '')
   );
@@ -48,10 +68,12 @@ const ExperiencesPage = () => {
         />
       </div>
 
-      {/* Experience List */}
-      {filteredExperiences.length === 0 ? (
+      {/* Content Area */}
+      {loading ? (
+        <div className="text-center text-slate-400 py-12">Loading experiences...</div>
+      ) : filteredExperiences.length === 0 ? (
         <div className="text-center text-slate-500 py-12">
-          <p className="text-lg">No experiences found matching "{searchTerm}"</p>
+          <p className="text-lg">No experiences found{searchTerm ? ` matching "${searchTerm}"` : ''}.</p>
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-2">
@@ -93,7 +115,12 @@ const ExperiencesPage = () => {
                   {exp.experience}
                 </p>
 
-                <Link to={`/experience/${exp._id}`} className="mt-auto">
+                {/* ✅ FIX: Absolute path avoids /experiences/experience/:id mismatch.
+                    Relative links resolve from the CURRENT route segment, so
+                    from /c/bitmesra/experiences, a relative `experience/id` would
+                    produce /c/bitmesra/experiences/experience/id (wrong!).
+                    Absolute path always resolves correctly to /c/bitmesra/experience/id */}
+                <Link to={`/c/${collegeSlug}/experience/${exp._id}`} className="mt-auto">
                   <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white gap-2 group-hover:translate-x-1 transition-transform">
                     Read Full Story <ArrowRight className="h-4 w-4" />
                   </Button>

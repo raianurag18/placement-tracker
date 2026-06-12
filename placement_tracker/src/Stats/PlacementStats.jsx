@@ -1,14 +1,17 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, ArcElement, BarElement, Tooltip, Legend } from 'chart.js';
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { getAllPlacements } from '../api/placementApi';
 
 ChartJS.register(CategoryScale, LinearScale, ArcElement, BarElement, Tooltip, Legend);
 
 const PlacementStats = () => {
+  const { collegeSlug } = useParams();
   const [placements, setPlacements] = useState([]);
   const [yearFilter, setYearFilter] = useState('');
   const [branchFilter, setBranchFilter] = useState('');
@@ -18,11 +21,16 @@ const PlacementStats = () => {
   const [showOffers, setShowOffers] = useState(false);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/placements/all`)
-      .then((res) => res.json())
-      .then((data) => setPlacements(data))
-      .catch((err) => console.error('Error fetching placements:', err));
-  }, []);
+    const fetchData = async () => {
+      try {
+        const data = await getAllPlacements(collegeSlug);
+        setPlacements(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error fetching placements:', err.message);
+      }
+    };
+    if (collegeSlug) fetchData();
+  }, [collegeSlug]);
 
   const years = useMemo(() => [...new Set(placements.map(p => p.year))].sort((a, b) => b - a), [placements]);
   const branches = useMemo(() => [...new Set(placements.map(p => p.branch))].sort(), [placements]);
