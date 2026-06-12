@@ -28,7 +28,7 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
 
       // Step 2: Verify token signature using the secret key
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-123');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET );
 
       // Step 3: Load user from DB — always get fresh data
       req.user = await User.findById(decoded.id).select('-password');

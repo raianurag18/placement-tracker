@@ -29,6 +29,9 @@ yarn-error.log*
 # Local MongoDB database dumps
 dump/
 
+# Uploaded files (user-generated content)
+**/uploads/
+
 # OS-specific
 ehthumbs.db
 Icon?
