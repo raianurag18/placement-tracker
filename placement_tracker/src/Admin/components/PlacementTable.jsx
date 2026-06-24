@@ -14,7 +14,8 @@ import { Input } from "../../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
 import AddPlacementForm from './AddPlacementForm';
 import EditPlacementForm from './EditPlacementForm';
-import { getAllPlacements, deletePlacement } from '../../api/placementApi';
+import { deletePlacement } from '../../api/placementApi';
+import { adminFetch } from '../../api/client';
 
 const PlacementTable = () => {
   const { collegeSlug } = useParams();
@@ -24,8 +25,7 @@ const PlacementTable = () => {
   useEffect(() => {
     const fetchPlacements = async () => {
       try {
-        // getAllPlacements fetches /api/c/:slug/placements/all with admin token
-        const data = await getAllPlacements(collegeSlug);
+        const data = await adminFetch(collegeSlug, '/placements/all');
         setPlacements(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Error fetching placements:', err.message);

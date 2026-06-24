@@ -14,6 +14,27 @@ const ExperienceDetailPage = () => {
     const [experience, setExperience] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [copied, setCopied] = useState(false);
+
+    const handleShare = async () => {
+        const url = window.location.href;
+        // Try native share (mobile) first, fall back to clipboard
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: `${experience.company} - ${experience.role} Interview Experience`,
+                    text: `Check out this interview experience at ${experience.company}`,
+                    url
+                });
+            } catch (err) {
+                // User cancelled share — not an error
+            }
+        } else {
+            await navigator.clipboard.writeText(url);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
 
     useEffect(() => {
         const fetchExperience = async () => {
@@ -196,8 +217,8 @@ const ExperienceDetailPage = () => {
                         <CardContent className="p-6">
                             <h4 className="font-semibold text-slate-900 mb-2">Find this helpful?</h4>
                             <p className="text-sm text-slate-500 mb-4">Share with your batchmates.</p>
-                            <Button variant="outline" className="w-full gap-2">
-                                <Share2 className="h-4 w-4" /> Share Experience
+                            <Button variant="outline" className="w-full gap-2" onClick={handleShare}>
+                                <Share2 className="h-4 w-4" /> {copied ? 'Link Copied!' : 'Share Experience'}
                             </Button>
                         </CardContent>
                     </Card>

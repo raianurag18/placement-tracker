@@ -62,6 +62,6 @@ export const getMyResume = (slug, signal) =>
  */
 export const updateResume = (slug, data) =>
     tenantFetch(slug, '/resume/update', {
-        method: 'PUT',
+        method: 'POST',
         body: JSON.stringify(data),
     });

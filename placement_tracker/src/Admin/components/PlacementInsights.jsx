@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../..
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, ArcElement, BarElement, Tooltip, Legend } from 'chart.js';
 import { Briefcase, TrendingUp, Users, DollarSign, Award } from 'lucide-react';
-import { getAllPlacements } from '../../api/placementApi';
+import { adminFetch } from '../../api/client';
 
 ChartJS.register(CategoryScale, LinearScale, ArcElement, BarElement, Tooltip, Legend);
 
@@ -15,7 +15,7 @@ const PlacementInsights = () => {
   useEffect(() => {
     const fetchPlacements = async () => {
       try {
-        const data = await getAllPlacements(collegeSlug);
+        const data = await adminFetch(collegeSlug, '/placements/all');
         setPlacements(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Error fetching placements:', err.message);

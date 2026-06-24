@@ -44,6 +44,11 @@ const handleResponse = async (response, slug) => {
     if (!response.ok) {
         // Try to parse JSON error body, fall back to a generic message
         const errData = await response.json().catch(() => ({}));
+        // If there are field-level validation errors, include them in the message
+        if (errData.errors && Array.isArray(errData.errors)) {
+            const details = errData.errors.map(e => e.message).join(', ');
+            throw new Error(details);
+        }
         throw new Error(errData.message || `Request failed with status ${response.status}`);
     }
 
