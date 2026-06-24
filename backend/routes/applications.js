@@ -63,8 +63,21 @@ router.get('/check/:jobId', protect, asyncHandler(async (req, res) => {
 router.patch('/:id', protect, validateUpdateApplication, asyncHandler(async (req, res) => {
     const { status, notes, company, role } = req.body;
 
-    const application = await Application.findOneAndUpdate(
-        { _id: req.params.id, student: req.user._id },
+    // Find the application first to check ownership
+    const application = await Application.findOne({ _id: req.params.id, student: req.user._id });
+
+    if (!application) {
+        throw new AppError('Application not found', 404);
+    }
+
+    // If this application is linked to a job posting, students cannot change status
+    // (only admin can manage status for job-linked applications)
+    if (application.job && status) {
+        throw new AppError('Status for job applications can only be updated by the placement cell.', 403);
+    }
+
+    const updated = await Application.findByIdAndUpdate(
+        application._id,
         {
             $set: {
                 ...(company && { company }),
@@ -76,11 +89,7 @@ router.patch('/:id', protect, validateUpdateApplication, asyncHandler(async (req
         { new: true, runValidators: false }
     );
 
-    if (!application) {
-        throw new AppError('Application not found', 404);
-    }
-
-    res.json(application);
+    res.json(updated);
 }));
 
 // POST /api/c/:collegeSlug/applications/create - Manual application entry

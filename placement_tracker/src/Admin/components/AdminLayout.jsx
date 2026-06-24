@@ -69,7 +69,8 @@ const AdminLayout = () => {
             Management
           </div>
           <NavItem to={`${basePath}/jobs`} icon={Briefcase} label="Placement Drives" />
-          <NavItem to={`${basePath}/placements`} icon={Users} label="Placement Records" />
+          <NavItem to={`${basePath}/applications`} icon={Users} label="Applications" />
+          <NavItem to={`${basePath}/placements`} icon={FileText} label="Placement Records" />
           <NavItem to={`${basePath}/experiences`} icon={FileText} label="Experience Moderation" />
         </div>
 
