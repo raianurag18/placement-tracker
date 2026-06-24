@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const createDummyAdmin = require('./utils/adminSeeder');
 const path = require('path');
 
 // ──────────────────────────────────────────────
@@ -44,7 +43,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 mongoose.connect(process.env.MONGO_URI, {})
   .then(() => {
     console.log('✅ MongoDB connected');
-    createDummyAdmin();
   })
   .catch((err) => console.error('❌ MongoDB connection error:', err));
 
