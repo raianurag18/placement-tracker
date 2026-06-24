@@ -166,21 +166,27 @@ const MyApplications = () => {
                                                     Applied: {new Date(app.appliedAt).toLocaleDateString()}
                                                 </div>
                                                 <div className="flex justify-between items-center mt-2 pt-3 border-t border-slate-100">
-                                                    {status !== 'Applied' && (
-                                                        <button
-                                                            onClick={() => quickUpdateStatus(app._id, COLUMN_STATUSES[COLUMN_STATUSES.indexOf(status) - 1])}
-                                                            className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-                                                        >
-                                                            &larr; Prev
-                                                        </button>
-                                                    )}
-                                                    {status !== 'Rejected' && status !== 'Selected' && (
-                                                        <button
-                                                            onClick={() => quickUpdateStatus(app._id, COLUMN_STATUSES[COLUMN_STATUSES.indexOf(status) + 1])}
-                                                            className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors ml-auto"
-                                                        >
-                                                            Next &rarr;
-                                                        </button>
+                                                    {app.job ? (
+                                                        <span className="text-xs text-slate-400 italic">Status managed by placement cell</span>
+                                                    ) : (
+                                                        <>
+                                                            {status !== 'Applied' && (
+                                                                <button
+                                                                    onClick={() => quickUpdateStatus(app._id, COLUMN_STATUSES[COLUMN_STATUSES.indexOf(status) - 1])}
+                                                                    className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                                                                >
+                                                                    &larr; Prev
+                                                                </button>
+                                                            )}
+                                                            {status !== 'Rejected' && status !== 'Selected' && (
+                                                                <button
+                                                                    onClick={() => quickUpdateStatus(app._id, COLUMN_STATUSES[COLUMN_STATUSES.indexOf(status) + 1])}
+                                                                    className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors ml-auto"
+                                                                >
+                                                                    Next &rarr;
+                                                                </button>
+                                                            )}
+                                                        </>
                                                     )}
                                                 </div>
                                                 <div className="absolute top-4 right-2 opacity-0 group-hover:opacity-100 transition-opacity">

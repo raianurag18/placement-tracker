@@ -9,7 +9,8 @@ import { getPlacementStats } from '../api/placementApi';
 // ⚠️ INTERVIEW TIP: Notice how the dashboard fetches TWO APIs in parallel
 // using separate async calls inside a single useEffect. This is efficient
 // because both requests fire simultaneously instead of waiting for each other.
-const StudentDashboard = ({ user }) => {
+const StudentDashboard = () => {
+  const { user } = useAuth();
   const { collegeSlug } = useParams();
   const [experiences, setExperiences] = useState([]);
   const [stats, setStats] = useState({
