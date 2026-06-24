@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "../components/ui/button";
-import { ArrowRight, BarChart2, Users, BookOpen, CheckCircle, GraduationCap, ShieldCheck, ArrowLeft, Bell } from 'lucide-react';
+import { ArrowRight, BarChart2, Users, BookOpen, CheckCircle, GraduationCap, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import InstituteSearch from '../components/InstituteSearch';
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 
 const LandingPage = () => {
     const [selectedInstitute, setSelectedInstitute] = useState(null);
+    const [publicStats, setPublicStats] = useState(null);
     const navigate = useNavigate();
 
     // Check localStorage on mount
@@ -17,6 +18,23 @@ const LandingPage = () => {
             setSelectedInstitute(JSON.parse(saved));
         }
     }, []);
+
+    // Fetch public stats when institute is selected
+    useEffect(() => {
+        if (!selectedInstitute?.slug) return;
+        const fetchStats = async () => {
+            try {
+                const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+                const res = await fetch(`${apiUrl}/api/institutes/${selectedInstitute.slug}/public-stats`);
+                if (res.ok) {
+                    setPublicStats(await res.json());
+                }
+            } catch (err) {
+                console.error('Failed to fetch public stats:', err);
+            }
+        };
+        fetchStats();
+    }, [selectedInstitute?.slug]);
 
     const handleInstituteSelect = (institute) => {
         setSelectedInstitute(institute);
@@ -145,26 +163,36 @@ const LandingPage = () => {
                                 </div>
                             </div>
 
-                            {/* Live Notice Board Card */}
+                            {/* Live Stats Card */}
                             <Card className="bg-white border-slate-200 shadow-lg shadow-slate-200/50 overflow-hidden relative">
                                 <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
                                 <CardHeader className="pb-2">
                                     <CardTitle className="flex items-center gap-2 text-slate-800">
-                                        <Bell className="h-5 w-5 text-blue-500 animate-pulse" /> Latest Notices
+                                        <BarChart2 className="h-5 w-5 text-blue-500" /> Quick Overview
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
-                                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm">
-                                        <span className="text-xs font-bold text-blue-600 block mb-1">TODAY</span>
-                                        Google Interview Shortlist released. Check email.
+                                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm flex justify-between items-center">
+                                        <span className="text-slate-600">Students Placed</span>
+                                        <span className="font-bold text-slate-900">{publicStats?.totalPlacements || '—'}</span>
                                     </div>
-                                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm">
-                                        <span className="text-xs font-bold text-slate-500 block mb-1">YESTERDAY</span>
-                                        Pre-placement talk by Amazon scheduled for 10 AM.
+                                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm flex justify-between items-center">
+                                        <span className="text-slate-600">Companies Visited</span>
+                                        <span className="font-bold text-slate-900">{publicStats?.totalCompanies || '—'}</span>
                                     </div>
-                                    <Button variant="link" className="p-0 h-auto text-blue-600 text-xs w-full justify-end">
-                                        View All Notices &rarr;
-                                    </Button>
+                                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm flex justify-between items-center">
+                                        <span className="text-slate-600">Experiences Shared</span>
+                                        <span className="font-bold text-slate-900">{publicStats?.totalExperiences || '—'}</span>
+                                    </div>
+                                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm flex justify-between items-center">
+                                        <span className="text-slate-600">Active Job Openings</span>
+                                        <span className="font-bold text-blue-600">{publicStats?.activeJobs || '—'}</span>
+                                    </div>
+                                    <Link to={`/c/${selectedInstitute.slug}/login`} className="block">
+                                        <Button variant="link" className="p-0 h-auto text-blue-600 text-xs w-full justify-end">
+                                            Login to explore &rarr;
+                                        </Button>
+                                    </Link>
                                 </CardContent>
                             </Card>
                         </div>

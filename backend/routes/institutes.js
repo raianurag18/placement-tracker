@@ -1,5 +1,8 @@
 const router = require('express').Router();
 const Institute = require('../models/Institute');
+const Placement = require('../models/Placement');
+const Experience = require('../models/Experience');
+const Job = require('../models/Job');
 const tenantResolver = require('../middleware/tenantResolver');
 const { asyncHandler } = require('../middleware/errorHandler');
 
@@ -26,6 +29,20 @@ router.get('/:collegeSlug/meta', tenantResolver, asyncHandler(async (req, res) =
         logoUrl: req.college.logoUrl,
         slug: req.college.slug
     });
+}));
+
+// GET /api/institutes/:collegeSlug/public-stats - Public overview stats (pre-login portal)
+router.get('/:collegeSlug/public-stats', tenantResolver, asyncHandler(async (req, res) => {
+    const instId = req.college._id;
+
+    const [totalPlacements, totalCompanies, totalExperiences, activeJobs] = await Promise.all([
+        Placement.countDocuments({ institute: instId }),
+        Placement.distinct('companyName', { institute: instId }).then(arr => arr.length),
+        Experience.countDocuments({ institute: instId, approved: true }),
+        Job.countDocuments({ institute: instId, deadline: { $gte: new Date() } })
+    ]);
+
+    res.json({ totalPlacements, totalCompanies, totalExperiences, activeJobs });
 }));
 
 module.exports = router;
