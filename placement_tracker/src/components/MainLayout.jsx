@@ -5,7 +5,7 @@ import { Menu } from 'lucide-react';
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 
-const MainLayout = ({ user }) => {
+const MainLayout = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (

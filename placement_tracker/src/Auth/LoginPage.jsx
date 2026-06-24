@@ -232,7 +232,7 @@ const LoginPage = () => {
               )}
 
               <div className="text-center space-y-2">
-                <Link to={collegeSlug ? `/c/${collegeSlug}/admin/login` : "/admin/login"} className="block text-sm text-purple-600 hover:text-purple-700 hover:underline font-medium">
+                <Link to={`/c/${collegeSlug}/admin/login`} className="block text-sm text-purple-600 hover:text-purple-700 hover:underline font-medium">
                   Placement Cell Member? Admin Login
                 </Link>
 

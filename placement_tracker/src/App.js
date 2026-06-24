@@ -31,6 +31,7 @@ import PlacementTable from './Admin/components/PlacementTable';
 import ExperienceModeration from './Admin/components/ExperienceModeration';
 import AdminPrivateRoute from './Admin/AdminPrivateRoute';
 import AdminJobsPage from './Admin/components/AdminJobsPage';
+import AdminApplications from './Admin/components/AdminApplications';
 import TenantLayout from './components/TenantLayout';
 
 function App() {
@@ -74,43 +75,37 @@ function App() {
             {/* College Student Login — /c/bitmesra/login */}
             <Route path="login" element={<LoginPage />} />
 
-            {/* College Admin Login — /c/bitmesra/admin/login */}
-            <Route path="admin/login" element={<AdminLogin />} />
-
             {/* College Student Portal — /c/bitmesra/dashboard, etc. */}
-            <Route element={<MainLayout user={user} />}>
-                {user && <Route index element={<Navigate to="dashboard" replace />} />}
-                {user && <Route path="dashboard" element={<StudentDashboard user={user} />} />}
+            <Route element={<PrivateRoute><MainLayout /></PrivateRoute>}>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<StudentDashboard />} />
                 <Route path="experiences" element={<ExperiencesPage />} />
-                <Route path="experience/:id" element={<PrivateRoute user={user}><ExperienceDetailPage /></PrivateRoute>} />
-                <Route path="submit" element={<PrivateRoute user={user}><SubmitExperience /></PrivateRoute>} />
-                <Route path="profile" element={<PrivateRoute user={user}><ProfilePage /></PrivateRoute>} />
-                <Route path="resume-builder" element={<PrivateRoute><ResumeBuilder /></PrivateRoute>} />
-                <Route path="resume/preview" element={<PrivateRoute><ResumePreview /></PrivateRoute>} />
-                <Route path="jobs" element={<PrivateRoute><JobsPage /></PrivateRoute>} />
-                <Route path="my-applications" element={<PrivateRoute><MyApplications /></PrivateRoute>} />
-                <Route path="stats" element={<PrivateRoute><PlacementStats /></PrivateRoute>} />
-                <Route path="companies" element={<PrivateRoute user={user}><CompaniesPage /></PrivateRoute>} />
-                <Route path="companies/:companyName" element={<PrivateRoute user={user}><CompanyPlacementsPage /></PrivateRoute>} />
-                <Route path="branch-stats" element={<PrivateRoute user={user}><BranchStatsPage /></PrivateRoute>} />
-                <Route path="branch/:branchName" element={<PrivateRoute user={user}><BranchPlacementsPage /></PrivateRoute>} />
-                <Route path="highest-package-branch" element={<PrivateRoute user={user}><HighestPackageBranchPage /></PrivateRoute>} />
+                <Route path="experience/:id" element={<ExperienceDetailPage />} />
+                <Route path="submit" element={<SubmitExperience />} />
+                <Route path="profile" element={<ProfilePage />} />
+                <Route path="resume-builder" element={<ResumeBuilder />} />
+                <Route path="resume/preview" element={<ResumePreview />} />
+                <Route path="jobs" element={<JobsPage />} />
+                <Route path="my-applications" element={<MyApplications />} />
+                <Route path="stats" element={<PlacementStats />} />
+                <Route path="companies" element={<CompaniesPage />} />
+                <Route path="companies/:companyName" element={<CompanyPlacementsPage />} />
+                <Route path="branch-stats" element={<BranchStatsPage />} />
+                <Route path="branch/:branchName" element={<BranchPlacementsPage />} />
+                <Route path="highest-package-branch" element={<HighestPackageBranchPage />} />
             </Route>
 
-            {/* College Admin Portal — /c/bitmesra/admin/dashboard */}
-            <Route
-                path="admin"
-                element={
-                    <AdminPrivateRoute>
-                        <AdminLayout />
-                    </AdminPrivateRoute>
-                }
-            >
-                <Route index element={<Navigate to="dashboard" replace />} />
-                <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="placements" element={<PlacementTable />} />
-                <Route path="experiences" element={<ExperienceModeration />} />
-                <Route path="jobs" element={<AdminJobsPage />} />
+            {/* College Admin — /c/bitmesra/admin/login + /c/bitmesra/admin/dashboard */}
+            <Route path="admin">
+                <Route path="login" element={<AdminLogin />} />
+                <Route element={<AdminPrivateRoute><AdminLayout /></AdminPrivateRoute>}>
+                    <Route index element={<Navigate to="dashboard" replace />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="placements" element={<PlacementTable />} />
+                    <Route path="experiences" element={<ExperienceModeration />} />
+                    <Route path="jobs" element={<AdminJobsPage />} />
+                    <Route path="applications" element={<AdminApplications />} />
+                </Route>
             </Route>
         </Route>
 

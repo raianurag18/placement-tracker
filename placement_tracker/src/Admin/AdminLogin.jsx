@@ -25,12 +25,8 @@ const AdminLogin = () => {
   const { collegeSlug } = useParams();
 
   useEffect(() => {
-    if (localStorage.getItem('isAdminLoggedIn') === 'true') {
-      // Redirect to college-specific dashboard if slug is known
-      const redirectPath = collegeSlug
-        ? `/c/${collegeSlug}/admin/dashboard`
-        : '/admin/dashboard';
-      navigate(redirectPath);
+    if (localStorage.getItem('isAdminLoggedIn') === 'true' && collegeSlug) {
+      navigate(`/c/${collegeSlug}/admin/dashboard`);
     }
   }, [navigate, collegeSlug]);
 
@@ -66,10 +62,7 @@ const AdminLogin = () => {
         }
 
         // Navigate to college-specific admin dashboard
-        const dashboardPath = collegeSlug
-          ? `/c/${collegeSlug}/admin/dashboard`
-          : '/admin/dashboard';
-        navigate(dashboardPath);
+        navigate(`/c/${collegeSlug}/admin/dashboard`);
       } else {
         setError(data.message || 'Invalid credentials');
       }
@@ -176,7 +169,7 @@ const AdminLogin = () => {
             </form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2 text-center">
-            <Link to={collegeSlug ? `/c/${collegeSlug}/login` : "/login"} className="text-sm text-purple-600 hover:text-purple-700 hover:underline font-medium">
+            <Link to={`/c/${collegeSlug}/login`} className="text-sm text-purple-600 hover:text-purple-700 hover:underline font-medium">
               Not an Admin? Go to Student Login
             </Link>
             <Link to="/" className="text-sm text-slate-500 hover:text-purple-600 hover:underline">
