@@ -67,8 +67,9 @@ router.get('/pending-experiences', protect, isAdmin, asyncHandler(async (req, re
 
 // PATCH /api/c/:collegeSlug/admin/approve/:id
 router.patch('/approve/:id', protect, isAdmin, asyncHandler(async (req, res) => {
-    const updated = await Experience.findByIdAndUpdate(
-        req.params.id,
+    // Scope by institute so an admin cannot approve another college's experience
+    const updated = await Experience.findOneAndUpdate(
+        { _id: req.params.id, institute: req.college._id },
         { approved: true },
         { new: true }
     );
@@ -80,7 +81,11 @@ router.patch('/approve/:id', protect, isAdmin, asyncHandler(async (req, res) => 
 
 // DELETE /api/c/:collegeSlug/admin/experience/:id
 router.delete('/experience/:id', protect, isAdmin, asyncHandler(async (req, res) => {
-    const experience = await Experience.findByIdAndDelete(req.params.id);
+    // Scope by institute so an admin cannot delete another college's experience
+    const experience = await Experience.findOneAndDelete({
+        _id: req.params.id,
+        institute: req.college._id
+    });
     if (!experience) {
         throw new AppError('Experience not found', 404);
     }
@@ -130,8 +135,9 @@ router.patch('/applications/:id/status', protect, isAdmin, asyncHandler(async (r
         throw new AppError('Invalid status value', 400);
     }
 
-    const application = await Application.findByIdAndUpdate(
-        req.params.id,
+    // Scope by institute so an admin cannot change another college's application status
+    const application = await Application.findOneAndUpdate(
+        { _id: req.params.id, institute: req.college._id },
         { status },
         { new: true }
     );

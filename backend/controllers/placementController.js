@@ -103,8 +103,9 @@ exports.createPlacement = async (req, res) => {
 // Update placement (Admin only)
 // ─────────────────────────────────────────────────────────────────
 exports.updatePlacement = async (req, res) => {
-    const updatedPlacement = await Placement.findByIdAndUpdate(
-        req.params.id,
+    // Scope by institute so an admin cannot update another college's placement
+    const updatedPlacement = await Placement.findOneAndUpdate(
+        { _id: req.params.id, institute: req.college._id },
         req.body,
         { new: true }
     );
@@ -118,7 +119,11 @@ exports.updatePlacement = async (req, res) => {
 // Delete placement (Admin only)
 // ─────────────────────────────────────────────────────────────────
 exports.deletePlacement = async (req, res) => {
-    const placement = await Placement.findByIdAndDelete(req.params.id);
+    // Scope by institute so an admin cannot delete another college's placement
+    const placement = await Placement.findOneAndDelete({
+        _id: req.params.id,
+        institute: req.college._id
+    });
     if (!placement) {
         throw new AppError('Placement not found', 404);
     }

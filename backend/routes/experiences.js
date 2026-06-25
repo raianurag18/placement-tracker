@@ -17,7 +17,11 @@ router.get('/', protect, asyncHandler(async (req, res) => {
 
 // GET /api/c/:collegeSlug/experiences/:id - Get specific experience
 router.get('/:id', protect, asyncHandler(async (req, res) => {
-    const experience = await Experience.findById(req.params.id);
+    // Scope by institute so one college cannot read another college's experience by id
+    const experience = await Experience.findOne({
+        _id: req.params.id,
+        institute: req.college._id
+    });
     if (!experience) {
         throw new AppError('Experience not found', 404);
     }
@@ -37,7 +41,11 @@ router.post('/', protect, validateExperience, asyncHandler(async (req, res) => {
 
 // DELETE /api/c/:collegeSlug/experiences/:id - Delete (Admin only)
 router.delete('/:id', protect, isAdmin, asyncHandler(async (req, res) => {
-    const experience = await Experience.findByIdAndDelete(req.params.id);
+    // Scope by institute so an admin cannot delete another college's experience
+    const experience = await Experience.findOneAndDelete({
+        _id: req.params.id,
+        institute: req.college._id
+    });
     if (!experience) {
         throw new AppError('Experience not found', 404);
     }
