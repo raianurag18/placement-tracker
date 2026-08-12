@@ -1,10 +1,6 @@
 {
   "name": "Placcera Placement Tracker",
-  "user": "node",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": "."
-  },
+  "user": "ubuntu",
   "install": "./scripts/cloud-agent-install.sh",
   "start": "./scripts/cloud-agent-start.sh",
   "ports": [
@@ -25,7 +21,7 @@
     },
     {
       "name": "frontend",
-      "command": "npm start --prefix placement_tracker",
+      "command": "BROWSER=none npm start --prefix placement_tracker",
       "description": "React dev server on port 3000"
     }
   ]

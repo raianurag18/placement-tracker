@@ -4,6 +4,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+./scripts/cloud-agent-start.sh
+
 if [ ! -f backend/.env ]; then
   cat > backend/.env <<'EOF'
 MONGO_URI=mongodb://127.0.0.1:27017/placement_tracker
