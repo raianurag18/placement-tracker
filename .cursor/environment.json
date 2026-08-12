@@ -1,0 +1,28 @@
+{
+  "name": "Placcera Placement Tracker",
+  "user": "ubuntu",
+  "install": "./scripts/cloud-agent-install.sh",
+  "start": "./scripts/cloud-agent-start.sh",
+  "ports": [
+    {
+      "name": "frontend",
+      "port": 3000
+    },
+    {
+      "name": "api",
+      "port": 5000
+    }
+  ],
+  "terminals": [
+    {
+      "name": "backend",
+      "command": "npm start --prefix backend",
+      "description": "Express API on port 5000"
+    },
+    {
+      "name": "frontend",
+      "command": "BROWSER=none npm start --prefix placement_tracker",
+      "description": "React dev server on port 3000"
+    }
+  ]
+}
