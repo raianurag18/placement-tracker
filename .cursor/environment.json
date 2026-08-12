@@ -1,6 +1,10 @@
 {
   "name": "Placcera Placement Tracker",
-  "user": "ubuntu",
+  "user": "node",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
   "install": "./scripts/cloud-agent-install.sh",
   "start": "./scripts/cloud-agent-start.sh",
   "ports": [

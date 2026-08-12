@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if ! command -v mongod >/dev/null 2>&1 || ! command -v mongosh >/dev/null 2>&1; then
+  echo "MongoDB binaries not found (need mongod + mongosh)." >&2
+  echo "Restore .cursor/Dockerfile (mongodb-org) and the environment.json build.dockerfile block," >&2
+  echo "then rebuild the Cloud Agent environment image." >&2
+  exit 127
+fi
+
 if [ "$(id -u)" -eq 0 ]; then
   DB_PATH="${MONGO_DATA_PATH:-/var/lib/mongodb}"
   LOG_PATH="${MONGO_LOG_PATH:-/var/log/mongodb/mongod.log}"
