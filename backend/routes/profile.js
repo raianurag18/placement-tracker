@@ -4,24 +4,28 @@ const User = require('../models/User');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const { protect } = require('../middleware/authMiddleware');
 const { asyncHandler, AppError } = require('../middleware/errorHandler');
 const { validateProfile } = require('../validators/profileValidator');
 
-// Configure Multer for PDF Uploads
+// Configure Multer for secure, tenant-isolated PDF uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const dir = 'uploads/resumes';
+        if (!req.user) {
+            return cb(new Error('User not authenticated'), null);
+        }
+        // Group uploads by Institute ID for tenant-level isolation
+        const dir = `uploads/${req.user.institute}/resumes`;
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
         }
         cb(null, dir);
     },
     filename: function (req, file, cb) {
-        if (!req.user) {
-            return cb(new Error('User not authenticated'), null);
-        }
-        cb(null, `user-${req.user._id}-${Date.now()}${path.extname(file.originalname)}`);
+        // Generate a random, cryptographically secure 32-character filename
+        const randomName = crypto.randomBytes(16).toString('hex');
+        cb(null, `${randomName}.pdf`);
     }
 });
 
@@ -62,7 +66,8 @@ router.post('/resume', protect, upload.single('resume'), asyncHandler(async (req
     }
 
     const user = await User.findById(req.user._id);
-    user.resume = `/uploads/resumes/${req.file.filename}`;
+    // Sanitize path separators so they remain web-safe forward slashes on both Windows and Linux
+    user.resume = `/${req.file.path.replace(/\\/g, '/')}`;
     await user.save();
 
     res.json({ message: 'Resume uploaded successfully', resumeUrl: user.resume });

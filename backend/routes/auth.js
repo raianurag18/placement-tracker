@@ -6,8 +6,11 @@ const router = express.Router();
 const { asyncHandler, AppError } = require('../middleware/errorHandler');
 const { validateLogin } = require('../validators/authValidator');
 
+const { authLimiter } = require('../middleware/rateLimiter');
+
 // POST /api/c/:collegeSlug/auth/login - Student login
-router.post('/login', validateLogin, asyncHandler(async (req, res) => {
+// Limits brute-force login attempts to protect student accounts
+router.post('/login', authLimiter, validateLogin, asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
     // Build tenant-scoped query

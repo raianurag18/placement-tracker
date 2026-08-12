@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const helmet = require('helmet');
 
 // ──────────────────────────────────────────────
 // Middleware Imports
@@ -28,11 +29,18 @@ const app = express();
 // ──────────────────────────────────────────────
 // Global Middleware
 // ──────────────────────────────────────────────
+// Protects the server by setting secure HTTP headers (defends against XSS, clickjacking, etc.)
+app.use(helmet());
+
 app.use(cors({
   origin: ['http://localhost:3000', 'http://localhost:3001', process.env.CLIENT_URL],
   credentials: true,
 }));
 app.use(express.json());
+
+// Mount the general API rate limiter to defend against excessive database queries
+const { apiLimiter } = require('./middleware/rateLimiter');
+app.use('/api', apiLimiter);
 
 // Serve static files (Uploaded Resumes)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

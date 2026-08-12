@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Briefcase, DollarSign, Users, BarChart, TrendingUp, ArrowRight } from 'lucide-react';
+import { Briefcase, DollarSign, Users, BarChart, TrendingUp, ArrowRight, AlertTriangle } from 'lucide-react';
 import { Button } from "../components/ui/button";
 import { getExperiences } from '../api/experienceApi';
 import { getPlacementStats } from '../api/placementApi';
@@ -12,7 +12,22 @@ import { getPlacementStats } from '../api/placementApi';
 const StudentDashboard = () => {
   const { user } = useAuth();
   const { collegeSlug } = useParams();
+  const location = useLocation();
   const [experiences, setExperiences] = useState([]);
+  const [errorMsg, setErrorMsg] = useState(location.state?.error || '');
+
+  useEffect(() => {
+    if (location.state?.error) {
+      // Clear location state from history to avoid banner persisting on page reloads
+      window.history.replaceState({}, document.title);
+      
+      // Auto-dismiss after 5 seconds
+      const timer = setTimeout(() => {
+        setErrorMsg('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [location]);
   const [stats, setStats] = useState({
     totalCompanies: 0,
     totalOffers: 0,
@@ -76,6 +91,22 @@ const StudentDashboard = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      
+      {/* Alert Banner for tenant violations */}
+      {errorMsg && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm animate-in slide-in-from-top duration-300 flex justify-between items-center">
+          <div className="flex items-center">
+            <AlertTriangle className="h-5 w-5 text-red-500 mr-3 shrink-0" />
+            <p className="text-sm text-red-800 font-medium">{errorMsg}</p>
+          </div>
+          <button 
+            onClick={() => setErrorMsg('')} 
+            className="text-red-400 hover:text-red-600 font-bold text-lg px-2 animate-pulse"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

@@ -12,10 +12,11 @@ import {
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Link } from 'react-router-dom';
-import { Shield, Lock, Mail, ArrowLeft, Loader2, LayoutDashboard } from 'lucide-react';
+import { Shield, Lock, Mail, ArrowLeft, Loader2, LayoutDashboard, Eye, EyeOff } from 'lucide-react';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -152,14 +153,25 @@ const AdminLogin = () => {
                   <Input
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="pl-10 bg-white border-slate-200 text-slate-900 focus:border-purple-500 focus:ring-purple-500/20"
+                    className="pl-10 pr-10 bg-white border-slate-200 text-slate-900 focus:border-purple-500 focus:ring-purple-500/20"
                     value={formData.password}
                     onChange={handleChange}
                     disabled={isLoading}
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
               </div>
 

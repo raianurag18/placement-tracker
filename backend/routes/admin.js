@@ -10,8 +10,11 @@ const { protect, isAdmin } = require('../middleware/authMiddleware');
 const { asyncHandler, AppError } = require('../middleware/errorHandler');
 const { validateLogin } = require('../validators/authValidator');
 
+const { authLimiter } = require('../middleware/rateLimiter');
+
 // POST /api/c/:collegeSlug/admin/login - Admin login
-router.post('/login', validateLogin, asyncHandler(async (req, res) => {
+// Limits brute-force login attempts to protect admin credentials
+router.post('/login', authLimiter, validateLogin, asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
     // Tenant-aware admin login: filter by email + role + college

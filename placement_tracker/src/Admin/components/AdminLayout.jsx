@@ -1,20 +1,22 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '../../components/ui/sheet';
 import {
   LayoutDashboard,
   FileText,
   Users,
   LogOut,
   ShieldCheck,
-  Briefcase
+  Briefcase,
+  Menu
 } from 'lucide-react';
-import Logo from '../../components/Logo';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { collegeSlug } = useParams();
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   
   const basePath = collegeSlug ? `/c/${collegeSlug}/admin` : '/admin';
 
@@ -27,7 +29,7 @@ const AdminLayout = () => {
   const isActive = (path) => location.pathname === path;
 
   const NavItem = ({ to, icon: Icon, label }) => (
-    <Link to={to} className="block mb-1">
+    <Link to={to} className="block mb-1" onClick={() => setIsMobileOpen(false)}>
       <div className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 group
             ${isActive(to)
           ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20'
@@ -39,62 +41,86 @@ const AdminLayout = () => {
     </Link>
   );
 
+  const renderSidebar = () => (
+    <aside className="h-full w-full bg-slate-900 border-r border-slate-800 flex flex-col">
+      {/* Logo Area */}
+      <div className="p-6 border-b border-slate-800/50">
+        <Link to={`${basePath}/dashboard`} className="block" onClick={() => setIsMobileOpen(false)}>
+          <div className="flex items-center gap-2">
+            <div className="bg-purple-600/10 p-2 rounded-lg border border-purple-600/20 flex items-center justify-center">
+              <ShieldCheck className="h-6 w-6 text-purple-600" />
+            </div>
+            <div>
+              <span className="font-bold text-xl tracking-tight text-white block">Admin Portal</span>
+              <span className="text-xs text-slate-500 font-medium">Placerra</span>
+            </div>
+          </div>
+        </Link>
+      </div>
+
+      {/* Navigation Links */}
+      <div className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+        <div className="px-4 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          Overview
+        </div>
+        <NavItem to={`${basePath}/dashboard`} icon={LayoutDashboard} label="Dashboard" />
+
+        <div className="px-4 mt-6 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          Management
+        </div>
+        <NavItem to={`${basePath}/jobs`} icon={Briefcase} label="Placement Drives" />
+        <NavItem to={`${basePath}/applications`} icon={Users} label="Applications" />
+        <NavItem to={`${basePath}/placements`} icon={FileText} label="Placement Records" />
+        <NavItem to={`${basePath}/experiences`} icon={FileText} label="Experience Moderation" />
+      </div>
+
+      {/* User & Logout */}
+      <div className="p-4 border-t border-slate-800/50 bg-slate-900/50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 bg-purple-900/50 rounded-full flex items-center justify-center text-purple-200 border border-purple-800">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white">Admin User</p>
+              <p className="text-xs text-slate-500">Placement Cell</p>
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-500 hover:text-red-400 hover:bg-slate-800">
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </div>
+      </div>
+    </aside>
+  );
+
   return (
-    <div className="min-h-screen bg-slate-50 font-sans flex">
-      {/* Sidebar */}
-      <aside className="fixed top-0 left-0 h-screen w-64 bg-slate-900 border-r border-slate-800 flex flex-col z-50">
-        {/* Logo Area */}
-        <div className="p-6 border-b border-slate-800/50">
-          <Link to={`${basePath}/dashboard`} className="block">
-            <div className="flex items-center gap-2">
-              <div className="bg-purple-600/10 p-2 rounded-lg border border-purple-600/20 flex items-center justify-center">
-                <ShieldCheck className="h-6 w-6 text-purple-600" />
-              </div>
-              <div>
-                <span className="font-bold text-xl tracking-tight text-white block">Admin Portal</span>
-                <span className="text-xs text-slate-500 font-medium">Placerra</span>
-              </div>
-            </div>
-          </Link>
+    <div className="min-h-screen bg-slate-50 font-sans flex flex-col md:flex-row">
+      {/* Desktop Sidebar (Hidden on Mobile) */}
+      <div className="hidden md:block w-64 shrink-0 fixed top-0 left-0 h-screen z-50">
+        {renderSidebar()}
+      </div>
+
+      {/* Mobile Header (Visible only on Mobile) */}
+      <div className="md:hidden fixed top-0 w-full z-50 bg-slate-900 text-white h-16 flex items-center justify-between px-4 border-b border-slate-800">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-6 w-6 text-purple-500" />
+          <span className="font-bold text-lg">Admin Portal</span>
         </div>
-
-        {/* Navigation Links */}
-        <div className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
-          <div className="px-4 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            Overview
-          </div>
-          <NavItem to={`${basePath}/dashboard`} icon={LayoutDashboard} label="Dashboard" />
-
-          <div className="px-4 mt-6 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            Management
-          </div>
-          <NavItem to={`${basePath}/jobs`} icon={Briefcase} label="Placement Drives" />
-          <NavItem to={`${basePath}/applications`} icon={Users} label="Applications" />
-          <NavItem to={`${basePath}/placements`} icon={FileText} label="Placement Records" />
-          <NavItem to={`${basePath}/experiences`} icon={FileText} label="Experience Moderation" />
-        </div>
-
-        {/* User & Logout */}
-        <div className="p-4 border-t border-slate-800/50 bg-slate-900/50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 bg-purple-900/50 rounded-full flex items-center justify-center text-purple-200 border border-purple-800">
-                <ShieldCheck className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white">Admin User</p>
-                <p className="text-xs text-slate-500">Placement Cell</p>
-              </div>
-            </div>
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-500 hover:text-red-400 hover:bg-slate-800">
-              <LogOut className="h-5 w-5" />
+        <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="text-white">
+              <Menu className="h-6 w-6" />
             </Button>
-          </div>
-        </div>
-      </aside>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 border-r-slate-800 bg-slate-900 w-64 text-white">
+            {renderSidebar()}
+          </SheetContent>
+        </Sheet>
+      </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 ml-64 p-8 overflow-y-auto">
+      <main className="flex-1 md:ml-64 min-h-screen pt-20 md:pt-8 p-6 md:p-8 overflow-y-auto transition-all duration-300">
         <div className="max-w-7xl mx-auto">
           <Outlet />
         </div>
