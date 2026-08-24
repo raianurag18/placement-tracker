@@ -1,220 +1,277 @@
-# Placcera — Multi-Tenant College Placement Tracker
+# Placcera — Multi-Tenant College Placement Platform
 
-A production-grade SaaS platform where multiple colleges independently manage placement records, job postings, and student applications — all from a single deployment. Built with route-based multi-tenancy, role-based access control, and defense-in-depth security.
+[![Live Demo](https://img.shields.io/badge/Live-placerra.vercel.app-2563eb?style=for-the-badge)](https://placerra.vercel.app)
+[![API Health](https://img.shields.io/badge/API-Render-46a758?style=for-the-badge)](https://placement-tracker-api-v3kn.onrender.com/health)
+[![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Express-5-339933?style=flat-square&logo=node.js)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat-square&logo=mongodb)](https://www.mongodb.com/)
 
-## Architecture Highlights
+> **Placcera** is a multi-tenant SaaS platform where multiple colleges run isolated placement portals from a single deployment — like Slack workspaces for campus placement cells and students.
 
-- **Multi-Tenant SaaS** — Each college gets an isolated portal via URL slugs (`/c/bitmesra/`, `/c/bitsgoa/`). A single codebase serves multiple institutions with complete data isolation.
-- **Route-Based Tenancy** — Tenant identity derived from URL (tamper-proof), not request body or headers. The `tenantResolver` middleware validates and attaches the college context before any business logic runs.
-- **Defense in Depth** — Three layers of tenant isolation: URL validation (tenantResolver), JWT cross-college check (authMiddleware), and query-level filtering (every DB query scoped by `institute`).
-- **Role-Based Access Control** — Student and Admin roles with middleware-enforced authorization. Admin actions (CRUD placements, approve experiences, post jobs) are gated behind `protect` + `isAdmin` middleware chain.
-- **Central Error Handling** — Custom `AppError` class + `asyncHandler` wrapper eliminates repetitive try/catch. Handles Mongoose validation errors, invalid ObjectIds, and duplicate keys automatically.
-- **Input Validation** — Zod schemas on every write endpoint with a reusable `validate()` middleware factory. Strips unknown fields, coerces types, returns structured error responses.
+**Built by [Anurag Rai](https://github.com/raianurag18)** · B.Tech, BIT Mesra
 
-## Tech Stack
+---
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, React Router v7, Tailwind CSS, Radix UI, Chart.js, Framer Motion |
-| Backend | Node.js, Express 5, MongoDB (Mongoose ODM) |
-| Auth | JWT (stateless), bcrypt password hashing |
-| Validation | Zod v4 |
-| File Upload | Multer (PDF resume uploads) |
-| UI Components | shadcn/ui (Radix + Tailwind primitives) |
+## Live demo
+
+| | Link |
+|---|------|
+| **Web app** | [https://placerra.vercel.app](https://placerra.vercel.app) |
+| **Student login (BIT Mesra)** | [https://placerra.vercel.app/c/bitmesra/login](https://placerra.vercel.app/c/bitmesra/login) |
+| **API health check** | [https://placement-tracker-api-v3kn.onrender.com/health](https://placement-tracker-api-v3kn.onrender.com/health) |
+
+### Try it in 30 seconds
+
+1. Open [placerra.vercel.app](https://placerra.vercel.app) and search **BIT** on the landing page, **or** go directly to the student portal link above.
+2. Log in with the **demo student account** (seed data — not a real student):
+
+   | Field | Value |
+   |-------|--------|
+   | Email | `student@bitmesra.edu` |
+   | Password | `student123` |
+
+3. Explore: **Dashboard** → **Placement stats** → **Jobs** → **Experiences** → **Resume builder**.
+
+**Other demo colleges** (same student password if seeded): `bitsgoa`, `iitbombay`, `nittrichy` — use `/c/bitsgoa/login`, etc.
+
+**Admin / placement-cell portal:** not published with open credentials (full CRUD on live data). Available on request or during interviews — screenshots below reflect admin capabilities.
+
+> **Note:** The API runs on Render’s free tier and may take 30–60 seconds to wake after idle periods.
+
+---
+
+## What this project demonstrates
+
+- **Route-based multi-tenancy** — tenant identity in the URL (`/c/:collegeSlug/...`), validated by `tenantResolver` before any business logic.
+- **Defense in depth** — URL tenant check → JWT cross-college validation → every Mongoose query scoped by `institute`.
+- **RBAC** — separate student and admin JWT flows; admin routes gated with `protect` + `isAdmin`.
+- **Production-shaped backend** — boot-time env validation, centralized errors (`AppError` + `asyncHandler`), Zod on write routes, Helmet, rate limiting.
+- **Full-stack product** — analytics, job board, application tracking, experience moderation, resume builder, PDF uploads.
+
+### Request flow (production)
+
+```text
+Browser (Vercel — React SPA)
+    → Render (Express 5 API)
+        → tenantResolver → protect / isAdmin → validate(Zod) → controller
+            → MongoDB Atlas (tenant-scoped documents)
+```
+
+---
 
 ## Features
 
-### Student Portal
-- **Placement Analytics** — View total offers, highest/average packages, company-wise and branch-wise breakdowns with interactive charts
-- **Interview Experiences** — Read seniors' interview experiences with round-by-round details, tips, and difficulty ratings
-- **Job Board** — Browse active job listings posted by the placement cell, apply with one click
-- **Application Tracker** — Kanban-style board to track applications through stages (Applied → Assessment → Interview → Selected/Rejected)
-- **Resume Builder** — Multi-section form (personal info, education, experience, projects, skills) with live preview and print-ready output
-- **Profile Management** — Update phone, upload PDF resume (Multer with 5MB limit, PDF-only filter)
+### Student portal
+- Placement analytics with Chart.js (company / branch breakdowns, highest packages)
+- Interview experiences (round-by-round, tips, difficulty) from placed seniors
+- Job board with one-click apply and eligibility filters
+- Application tracker (Applied → Assessment → Interview → Selected/Rejected)
+- Multi-step resume builder with print-ready preview
+- Profile + PDF resume upload (Multer, 5MB, PDF-only)
 
-### Admin Portal
-- **Placement Management** — Full CRUD for placement records with Zod-validated inputs
-- **Job Postings** — Create, edit, delete job listings with eligibility criteria and deadlines
-- **Experience Moderation** — Approve or reject student-submitted interview experiences before they go public
-- **Placement Insights** — Analytics dashboard with branch-wise stats and aggregation pipelines
+### Admin portal
+- Placement records CRUD with validated inputs
+- Job posting management (CTC, deadlines, eligibility)
+- Experience moderation (approve / reject before public visibility)
+- Placement insights and application pipeline control
 
-### Security & Data Isolation
-- All data endpoints require authentication (no anonymous access to placement data)
-- JWT includes `instituteId` — every API call is automatically tenant-aware
-- Cross-college access check: a valid JWT from College A is rejected with 403 on College B's routes
-- Compound unique index `{ email, institute }` — same email can exist in different colleges as separate accounts
-- Credentials stored in environment variables, never hardcoded
-- File uploads excluded from version control
+### Security & isolation
+- Compound unique index `{ email, institute }` — same email across colleges = separate accounts
+- Cross-tenant JWT from College A → 403 on College B routes
+- Secrets in environment variables only (never committed)
+- Separate `placerra_token` vs `admin_token` on the client
 
-## Project Structure
+---
 
-```
+## Tech stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 19, React Router v7, Tailwind CSS, shadcn/ui (Radix), Chart.js, Framer Motion |
+| Backend | Node.js 18+, Express 5, Mongoose 8 |
+| Database | MongoDB Atlas |
+| Auth | JWT (stateless), bcrypt |
+| Validation | Zod v4 |
+| Deploy | Vercel (SPA) + Render (API) |
+
+---
+
+## Screenshots
+
+_Add 3–4 images here for recruiters (landing page, student dashboard, placement stats, admin panel). Suggested path: `docs/screenshots/`._
+
+| Landing | Student dashboard | Placement stats | Admin |
+|---------|-------------------|-----------------|-------|
+| _screenshot_ | _screenshot_ | _screenshot_ | _screenshot_ |
+
+---
+
+## Project structure
+
+```text
 college_placement_project/
-├── backend/
-│   ├── config/            # Boot-time env contract + CORS origins
-│   ├── controllers/        # Business logic (placementController)
-│   ├── middleware/         # tenantResolver, authMiddleware, errorHandler
-│   ├── models/            # Mongoose schemas (User, Job, Placement, Experience, etc.)
-│   ├── routes/            # Express route definitions
-│   ├── validators/        # Zod schemas + validate() factory
-│   ├── utils/             # Seeders (admin, institutes, jobs, test tenants)
-│   ├── data/              # Seed data (placements.json, experiences.json)
-│   └── index.js           # Entry point, route mounting, middleware chain
-│
-├── placement_tracker/
+├── backend/                 # Express API (deploy root on Render)
+│   ├── config/              # Boot-time env contract + CORS
+│   ├── middleware/          # tenantResolver, auth, errorHandler, rateLimiter
+│   ├── models/              # Institute, User, Placement, Job, Experience, …
+│   ├── routes/              # Tenant-scoped route modules
+│   ├── validators/          # Zod schemas
+│   ├── utils/               # Seed scripts
+│   └── index.js
+├── placement_tracker/       # React SPA (deploy root on Vercel)
 │   ├── src/
-│   │   ├── api/           # Service layer (tenantFetch, adminFetch, globalFetch)
-│   │   ├── Admin/         # Admin portal pages + components
-│   │   ├── Auth/          # Login, GetStarted pages
-│   │   ├── Experience/    # Experience list + submit pages
-│   │   ├── Stats/         # Placement analytics pages
-│   │   ├── pages/         # Student portal pages
-│   │   ├── components/    # Shared UI (Header, Sidebar, TenantLayout, etc.)
-│   │   ├── context/       # AuthContext, CollegeContext
-│   │   └── App.js         # Route definitions
-│   └── public/            # Static assets, logos
-│
-└── .gitignore
+│   │   ├── api/             # tenantFetch, adminFetch, globalFetch
+│   │   ├── Admin/           # Admin portal
+│   │   ├── pages/           # Student pages
+│   │   ├── Stats/           # Analytics pages
+│   │   └── context/         # Auth + College context
+│   └── vercel.json          # SPA rewrites for /c/:slug routes
+└── render.yaml              # Optional Render blueprint (API only)
 ```
 
-## API Design
+---
 
-All tenant-specific endpoints follow the pattern:
-```
+## API design
+
+Tenant endpoints follow:
+
+```text
 /api/c/:collegeSlug/<resource>
 ```
 
-**Middleware chain**: `tenantResolver` → `protect` → `isAdmin` → `validate(schema)` → `asyncHandler(controller)`
+**Middleware chain:** `tenantResolver` → `protect` → `isAdmin` (if needed) → `validate(schema)` → `asyncHandler(controller)`
 
 | Endpoint | Method | Auth | Description |
 |----------|--------|------|-------------|
-| `/api/institutes/search?q=` | GET | Public | College search (landing page) |
+| `/api/institutes/search?q=` | GET | Public | College search (landing) |
+| `/api/institutes/:slug/public-stats` | GET | Public | Pre-login stats preview |
 | `/api/c/:slug/auth/login` | POST | Public | Student login |
 | `/api/c/:slug/admin/login` | POST | Public | Admin login |
 | `/api/c/:slug/placements/stats` | GET | Student/Admin | Placement statistics |
-| `/api/c/:slug/jobs` | GET/POST | Student/Admin | Job listings (POST = Admin only) |
-| `/api/c/:slug/applications/apply/:id` | POST | Student | Apply to a job |
+| `/api/c/:slug/jobs` | GET/POST | Student / Admin (POST) | Job listings |
+| `/api/c/:slug/applications/apply/:id` | POST | Student | Apply to job |
 | `/api/c/:slug/experiences` | GET/POST | Student/Admin | Interview experiences |
-| `/api/c/:slug/resume/my` | GET | Student | Get structured resume |
+| `/api/c/:slug/resume/my` | GET | Student | Structured resume |
+| `/health` | GET | Public | API + DB health |
 
-## Getting Started
+---
+
+## Local development
 
 ### Prerequisites
-- Node.js v18+
+- Node.js 18+
 - MongoDB (local or Atlas)
 
 ### Setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/raianurag18/placement-tracker.git
-cd college_placement_project
+cd placement-tracker
 
-# Backend setup
+# Backend
 cd backend
+cp .env.example .env    # fill MONGO_URI, JWT_SECRET, CLIENT_URL
 npm install
-```
+npm run dev             # nodemon — http://localhost:5000
 
-Create `backend/.env` (see `backend/.env.example`):
-```env
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_random_secret_key
-CLIENT_URL=http://localhost:3000
-PORT=5000
-```
-
-```bash
-# Run seed data (optional)
-node seed.js
+# Optional: seed demo tenants + data
+node migrate.js
 node utils/seedTestTenants.js
-
-# Start backend (nodemon)
-npm run dev
 ```
 
 ```bash
-# Frontend setup
-cd ../placement_tracker
+# Frontend (new terminal)
+cd placement_tracker
 cp .env.example .env.local
 npm install
-npm start
+npm start               # http://localhost:3000
 ```
 
-App runs at `http://localhost:3000`, API at `http://localhost:5000`.
-
-Use `npm run dev` in `backend/` for nodemon during local work. `npm start` is the production entry (`node index.js`).
-
-## Deploy (Vercel + Render + MongoDB Atlas)
-
-This split keeps the React SPA on a CDN and the API next to MongoDB. Do not point the frontend `proxy` field at production — CRA's proxy is local-only.
-
-### 1. MongoDB Atlas
-1. Create a free cluster and a database user.
-2. Allow network access from Render (`0.0.0.0/0` is typical for a student demo; tighten later).
-3. Copy the connection string (`MONGO_URI`).
-
-### 2. Backend on Render
-1. New Web Service from this GitHub repo, **root directory `backend`**.
-2. Build: `npm install` · Start: `npm start`.
-3. Health check path: `/health`.
-4. Environment variables:
-   - `NODE_ENV=production`
-   - `MONGO_URI` — Atlas URI
-   - `JWT_SECRET` — long random string (`openssl rand -hex 32`)
-   - `CLIENT_URL` — your Vercel origin, e.g. `https://your-app.vercel.app` (comma-separate preview URLs if needed)
-5. Optional: apply `render.yaml` in the repo root as a Render Blueprint.
-6. After first deploy, copy the API URL (e.g. `https://placerra-api.onrender.com`).
-
-Resume PDFs are stored on the API disk. Render's free disk is ephemeral — files vanish on restart. That is acceptable for a demo; S3 is the later upgrade.
-
-### 3. Frontend on Vercel
-1. Import the same repo. Set **Root Directory** to `placement_tracker`.
-2. Build: `npm run build` · Output: `build` (CRA default).
-3. Environment variable (must be set **before** the build):
-   - `REACT_APP_API_URL` = Render API origin, **no trailing slash** (`https://placerra-api.onrender.com`)
-4. `vercel.json` already rewrites all paths to `index.html` so `/c/bitmesra/dashboard` works on refresh.
-
-### 4. Smoke test
-- Open the Vercel URL → college search works (hits `/api/institutes/search`).
-- Open `https://your-api.onrender.com/health` → `{ "status": "ok" }`.
-- Log in as student and admin on a seeded tenant.
-- Confirm a hard refresh on a nested route does not 404.
-
-### Local vs production env files
-| File | Purpose |
-|------|---------|
-| `backend/.env.example` | Copy to `backend/.env` |
-| `placement_tracker/.env.example` | Copy to `placement_tracker/.env.local` |
-
-## Database Design
-
-| Model | Purpose | Multi-Tenant |
-|-------|---------|:---:|
-| Institute | College entity (name, slug, city, logo, isActive) | Root entity |
-| User | Students + Admins (compound index: email + institute) | ✅ |
-| Placement | Placement records (company, package, branch, year) | ✅ |
-| Job | Job postings by admin (company, CTC, deadline, eligibility) | ✅ |
-| Application | Student job applications with status pipeline | ✅ |
-| Experience | Interview experiences with rounds, tips, moderation | ✅ |
-| Resume | Structured resume data (one per student, upsert pattern) | Per-user |
-
-## Key Design Decisions
-
-| Decision | Rationale |
-|----------|-----------|
-| URL-based tenancy over subdomain | Simpler DNS, works on localhost, stateless |
-| Re-query DB on every request instead of trusting JWT | JWTs can't be revoked; ensures deleted/demoted users are caught immediately |
-| Compound unique index `{email, institute}` | Correct SaaS behavior — same email in different colleges = different accounts |
-| Separate admin/student JWT tokens | Prevents privilege escalation; stored in different localStorage keys |
-| Zod validation middleware factory | Single `validate(schema)` line adds validation to any route (DRY) |
-| Central error handler | Eliminates repetitive try/catch; consistent error response format |
-| Experience moderation pipeline | Student-submitted content requires admin approval before public visibility |
-
-## Author
-
-**Anurag Rai**
-B.Tech CSE, BIT Mesra (7th Semester)
+| Script | Purpose |
+|--------|---------|
+| `npm run dev` (backend) | Local API with nodemon |
+| `npm start` (backend) | Production entry (`node index.js`) — used on Render |
 
 ---
 
-*Built as a major project demonstrating SaaS architecture, multi-tenancy, RBAC, and production-grade backend patterns.*
+## Deployment
+
+Monorepo: **same GitHub repo**, two deploy targets.
+
+| Service | Host | Root directory | Start / build |
+|---------|------|----------------|---------------|
+| API | Render | `backend` | `npm install` · `npm start` · health `/health` |
+| SPA | Vercel | `placement_tracker` | `npm run build` · output `build` |
+
+### Backend (Render) — environment variables
+
+| Variable | Example / notes |
+|----------|-----------------|
+| `MONGO_URI` | Atlas connection string with `/placement_tracker` |
+| `JWT_SECRET` | Long random string (`openssl rand -hex 32`) |
+| `NODE_ENV` | `production` |
+| `CLIENT_URL` | `https://placerra.vercel.app` (no trailing slash) |
+
+### Frontend (Vercel) — environment variables
+
+| Variable | Example / notes |
+|----------|-----------------|
+| `REACT_APP_API_URL` | `https://placement-tracker-api-v3kn.onrender.com` (no trailing slash) |
+| `CI` | `false` (CRA treats ESLint warnings as errors when `CI=true`) |
+
+Set `REACT_APP_API_URL` **before** the first build; CRA inlines it at build time.
+
+After changing `CLIENT_URL` on Render, trigger a **manual redeploy** so CORS picks up the new frontend origin.
+
+**Limitations (demo tier):** Render free tier sleeps when idle; resume PDFs on Render disk are ephemeral (S3 would be the production upgrade).
+
+---
+
+## Database design
+
+| Model | Purpose | Multi-tenant |
+|-------|---------|:---:|
+| Institute | College (name, slug, city, `isActive`) | Root |
+| User | Students + admins (`email` + `institute` compound unique) | ✅ |
+| Placement | Company, package, branch, year | ✅ |
+| Job | Postings, CTC, deadline, eligibility | ✅ |
+| Application | Job pipeline per student | ✅ |
+| Experience | Interview breakdown + moderation | ✅ |
+| Resume | Structured resume (per student) | Per-user |
+
+---
+
+## Key design decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| URL-based tenancy | No subdomain DNS; works on localhost; tamper-proof tenant id |
+| Re-query user on each request | JWTs can’t be revoked before expiry |
+| `{ email, institute }` unique index | Correct SaaS: same email in different colleges = different users |
+| Separate student/admin tokens | Reduces privilege escalation risk |
+| Zod `validate()` middleware | One line per route; strips unknown fields |
+| Central `errorHandler` | Consistent JSON errors; no repetitive try/catch |
+| Experience moderation | User content requires admin approval |
+
+---
+
+## Security & demo policy
+
+- **Never commit** `.env`, Atlas passwords, or `JWT_SECRET`.
+- **Public demo** uses a shared **student** account on **seed / synthetic data** — sufficient for recruiters to explore the product.
+- **Admin credentials are not published** in this README; admin routes can delete or modify tenant data. Request a walkthrough for placement-cell features.
+- Rotate demo passwords if the shared student account is abused.
+
+---
+
+## Author
+
+**Anurag Rai**  
+B.Tech, BIT Mesra  
+
+- GitHub: [@raianurag18](https://github.com/raianurag18)
+- Repository: [placement-tracker](https://github.com/raianurag18/placement-tracker)
+
+---
+
+*Portfolio project showcasing multi-tenant SaaS architecture, RBAC, and production-oriented Node.js patterns.*
