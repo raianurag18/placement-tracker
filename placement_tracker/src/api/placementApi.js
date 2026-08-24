@@ -102,7 +102,7 @@ export const addPlacement = (slug, data) =>
  */
 export const updatePlacement = (slug, id, data) =>
     adminFetch(slug, `/placements/${id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         body: JSON.stringify(data),
     });
 

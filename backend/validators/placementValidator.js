@@ -6,6 +6,7 @@ const placementSchema = z.object({
     package: z.coerce.number().positive("Package must be a positive number"),
     year: z.coerce.number().int().min(2000).max(2030),
     branch: z.string().min(2, "Branch is required"),
+    studentName: z.string().trim().optional(),
 });
 
 module.exports = { validatePlacement: validate(placementSchema) };

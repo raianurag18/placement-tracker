@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Building2 } from 'lucide-react';
+import PageBackLink from '../components/PageBackLink';
 import { getCompaniesList } from '../api/placementApi';
 
 const CompaniesPage = () => {
@@ -66,6 +67,8 @@ const CompaniesPage = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      <PageBackLink to={`/c/${collegeSlug}/dashboard`} />
+
       <div className="text-center mb-12">
         <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-slate-900 mb-4">
           Partner Companies
@@ -77,7 +80,7 @@ const CompaniesPage = () => {
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {companies.map((company, index) => (
-          <Link to={`company/${encodeURIComponent(company)}`} key={index}>
+          <Link to={`/c/${collegeSlug}/companies/${encodeURIComponent(company)}`} key={index}>
             <Card className="bg-white border-slate-200 text-slate-900 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-blue-300">
               <CardHeader className="pb-2">
                 <CardTitle className="text-center text-lg">{company}</CardTitle>

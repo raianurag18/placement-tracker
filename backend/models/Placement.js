@@ -21,6 +21,10 @@ const PlacementSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  studentName: {
+    type: String,
+    required: false,
+  },
   date: {
     type: Date,
     default: Date.now,

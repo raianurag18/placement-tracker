@@ -29,7 +29,15 @@ const EditPlacementForm = ({ record, onRecordUpdated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const updatedRecord = await updatePlacement(collegeSlug, record._id, formData);
+      const payload = {
+        companyName: formData.companyName,
+        role: formData.role,
+        studentName: formData.studentName || undefined,
+        package: formData.package,
+        branch: formData.branch,
+        year: formData.year,
+      };
+      const updatedRecord = await updatePlacement(collegeSlug, record._id, payload);
       onRecordUpdated(updatedRecord);
       setOpen(false);
     } catch (err) {
@@ -60,7 +68,7 @@ const EditPlacementForm = ({ record, onRecordUpdated }) => {
           </div>
           <div>
             <Label htmlFor="studentName">Student Name</Label>
-            <Input id="studentName" name="studentName" value={formData.studentName} onChange={handleChange} />
+            <Input id="studentName" name="studentName" value={formData.studentName || ''} onChange={handleChange} />
           </div>
           <div>
             <Label htmlFor="package">CTC (LPA)</Label>

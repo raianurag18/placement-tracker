@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from "../components/ui/button";
-import { ArrowLeft, Building2, Calendar } from 'lucide-react';
+import { Building2, Calendar } from 'lucide-react';
+import PageBackLink from '../components/PageBackLink';
 import { getBranchPlacements } from '../api/placementApi';
+
+const BACK_FROM = {
+  'highest-package-branch': (slug) => `/c/${slug}/highest-package-branch`,
+  'branch-stats': (slug) => `/c/${slug}/branch-stats`,
+};
 
 const BranchPlacementsPage = () => {
   const { collegeSlug, branchName } = useParams();
+  const location = useLocation();
   const [placements, setPlacements] = useState([]);
+
+  const backTo = BACK_FROM[location.state?.from]?.(collegeSlug) ?? `/c/${collegeSlug}/dashboard`;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,20 +31,14 @@ const BranchPlacementsPage = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 min-h-screen">
-      <div className="flex items-center space-x-4 mb-4">
-        <Link to="../branch-stats">
-          <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
-            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Branch Stats
-          </Button>
-        </Link>
-      </div>
+      <PageBackLink to={backTo} />
 
       <div className="text-center mb-12">
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 lg:text-5xl">
-          {branchName} Placements
+          {decodeURIComponent(branchName)} Placements
         </h1>
         <p className="mt-4 text-lg text-slate-500">
-          Recent placement records for {branchName} students.
+          Recent placement records for {decodeURIComponent(branchName)} students.
         </p>
       </div>
 

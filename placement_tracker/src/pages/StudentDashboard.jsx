@@ -164,6 +164,9 @@ const StudentDashboard = () => {
               <span className="text-3xl font-bold text-slate-900">₹ {Number(stats.averagePackage || 0).toFixed(2)}</span>
               <span className="text-sm text-slate-400 ml-1">LPA</span>
             </div>
+            <Link to={`${base}/branch-stats`} className="mt-4 inline-flex items-center text-blue-600 font-medium hover:text-blue-700">
+              View Details <ArrowRight className="w-4 h-4 ml-1" />
+            </Link>
           </div>
           <div className="mt-4 pt-4 border-t border-slate-100">
             <p className="text-xs text-slate-400">Consistent growth over last 3 years.</p>

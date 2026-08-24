@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from "../components/ui/button";
-import { ArrowLeft, Briefcase, Calendar, GraduationCap } from 'lucide-react';
+import { Briefcase, Calendar, GraduationCap } from 'lucide-react';
+import PageBackLink from '../components/PageBackLink';
 import { getCompanyPlacements } from '../api/placementApi';
 
 const CompanyPlacementsPage = () => {
-  // Both :collegeSlug and :companyName come from the URL
   const { collegeSlug, companyName } = useParams();
   const [placements, setPlacements] = useState([]);
 
@@ -24,20 +23,14 @@ const CompanyPlacementsPage = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 min-h-screen">
-      <div className="flex items-center space-x-4 mb-4">
-        <Link to="../companies">
-          <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
-            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Companies
-          </Button>
-        </Link>
-      </div>
+      <PageBackLink to={`/c/${collegeSlug}/companies`} label="Back to Companies" />
 
       <div className="text-center mb-12">
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 lg:text-5xl">
-          {companyName} Placements
+          {decodeURIComponent(companyName)} Placements
         </h1>
         <p className="mt-4 text-lg text-slate-500">
-          History of offers and roles provided by {companyName}.
+          History of offers and roles provided by {decodeURIComponent(companyName)}.
         </p>
       </div>
 

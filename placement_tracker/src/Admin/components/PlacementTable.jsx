@@ -58,7 +58,7 @@ const PlacementTable = () => {
 
   const filteredPlacements = placements.filter(p =>
     p.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.studentName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -112,7 +112,7 @@ const PlacementTable = () => {
                     <TableRow key={p._id} className="hover:bg-slate-50 border-slate-100 group">
                       <TableCell className="font-medium text-slate-900">{p.companyName}</TableCell>
                       <TableCell className="text-slate-600">{p.role}</TableCell>
-                      <TableCell className="text-slate-600">{p.studentName}</TableCell>
+                      <TableCell className="text-slate-600">{p.studentName || '—'}</TableCell>
                       <TableCell>
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
                           {p.package} LPA

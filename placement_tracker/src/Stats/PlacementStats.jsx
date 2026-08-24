@@ -78,11 +78,12 @@ const PlacementStats = () => {
     filtered.forEach(offer => {
       data[offer.year] = (data[offer.year] || 0) + 1;
     });
+    const sortedYears = Object.keys(data).sort((a, b) => a - b);
     return {
-      labels: Object.keys(data).sort((a, b) => a - b),
+      labels: sortedYears,
       datasets: [{
         label: 'Offers per Year',
-        data: Object.values(data),
+        data: sortedYears.map((year) => data[year]),
         backgroundColor: 'rgba(59, 130, 246, 0.6)', // Blue-500
       }],
     };
@@ -118,18 +119,25 @@ const PlacementStats = () => {
     };
   }, [filtered]);
 
-  // Chart Options for Light Mode
+  // Chart.js needs a fixed-height parent + maintainAspectRatio: false to avoid
+  // resize-loop shrinking when the sidebar or page layout animates.
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         labels: { color: '#1e293b' } // Slate-800
       }
     },
     scales: {
-      x: { ticks: { color: '#64748b' }, grid: { color: '#e2e8f0' } }, // Slate-500 ticks, Slate-200 grid
+      x: { ticks: { color: '#64748b' }, grid: { color: '#e2e8f0' } },
       y: { ticks: { color: '#64748b' }, grid: { color: '#e2e8f0' } }
     }
+  };
+
+  const horizontalBarOptions = {
+    ...chartOptions,
+    indexAxis: 'y',
   };
 
   const pieOptions = {
@@ -144,7 +152,7 @@ const PlacementStats = () => {
 
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl text-center">📊 Placement Statistics</h1>
         <p className="mt-2 text-lg text-slate-500 text-center">Analyze placement trends and data.</p>
@@ -215,17 +223,23 @@ const PlacementStats = () => {
       <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2 mb-12">
         <Card className="lg:col-span-1 bg-white border-slate-200 shadow-sm">
           <CardHeader><CardTitle className="text-center text-slate-800">Year-wise Offers</CardTitle></CardHeader>
-          <CardContent><Bar data={yearData} options={chartOptions} /></CardContent>
+          <CardContent className="h-[300px]">
+            <Bar data={yearData} options={chartOptions} />
+          </CardContent>
         </Card>
         <Card className="lg:col-span-1 bg-white border-slate-200 shadow-sm">
           <CardHeader><CardTitle className="text-center text-slate-800">Branch-wise Distribution</CardTitle></CardHeader>
-          <CardContent className="max-h-80 flex justify-center"><Pie data={branchData} options={pieOptions} /></CardContent>
+          <CardContent className="h-80 flex justify-center">
+            <Pie data={branchData} options={pieOptions} />
+          </CardContent>
         </Card>
       </div>
       <div className="mb-12">
         <Card className="bg-white border-slate-200 shadow-sm">
           <CardHeader><CardTitle className="text-center text-slate-800">Top 10 Job Roles</CardTitle></CardHeader>
-          <CardContent><Bar data={roleData} options={{ ...chartOptions, indexAxis: 'y' }} /></CardContent>
+          <CardContent className="h-[400px]">
+            <Bar data={roleData} options={horizontalBarOptions} />
+          </CardContent>
         </Card>
       </div>
 
