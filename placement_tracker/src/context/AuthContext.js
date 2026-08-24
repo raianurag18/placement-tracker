@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext();
 
@@ -45,17 +45,11 @@ export const AuthProvider = ({ children }) => {
 
     // 4. Logout: Clear State AND LocalStorage
     const logout = () => {
-        const slug = user?.collegeSlug || localStorage.getItem('placerra_college_slug');
         setUser(null);
         localStorage.removeItem('placerra_user');
         localStorage.removeItem('placerra_token');
-        
-        // Notify server to kill cookie (using tenant endpoint if available)
-        if (slug) {
-            fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/c/${slug}/auth/logout`, { method: 'POST' }).catch(() => {});
-        } else {
-            fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/auth/logout`, { method: 'POST' }).catch(() => {});
-        }
+        localStorage.removeItem('placerra_college_slug');
+        // JWT is stateless — clearing client storage is logout. No server cookie to kill.
     };
 
     return (

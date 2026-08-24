@@ -51,6 +51,7 @@ A production-grade SaaS platform where multiple colleges independently manage pl
 ```
 college_placement_project/
 ├── backend/
+│   ├── config/            # Boot-time env contract + CORS origins
 │   ├── controllers/        # Business logic (placementController)
 │   ├── middleware/         # tenantResolver, authMiddleware, errorHandler
 │   ├── models/            # Mongoose schemas (User, Job, Placement, Experience, etc.)
@@ -114,34 +115,76 @@ cd backend
 npm install
 ```
 
-Create `backend/.env`:
+Create `backend/.env` (see `backend/.env.example`):
 ```env
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_random_secret_key
-ADMIN_EMAIL=admin@yourcollege.edu
-ADMIN_PASSWORD=your_secure_password
-SEED_STUDENT_PASSWORD=your_student_password
+CLIENT_URL=http://localhost:3000
+PORT=5000
 ```
 
 ```bash
-# Run migration (assigns existing data to default college)
-node migrate.js
+# Run seed data (optional)
+node seed.js
+node utils/seedTestTenants.js
 
-# Seed institutes (optional — adds sample colleges)
-node utils/instituteSeeder.js
-
-# Start backend
-npm start
+# Start backend (nodemon)
+npm run dev
 ```
 
 ```bash
 # Frontend setup
 cd ../placement_tracker
+cp .env.example .env.local
 npm install
 npm start
 ```
 
 App runs at `http://localhost:3000`, API at `http://localhost:5000`.
+
+Use `npm run dev` in `backend/` for nodemon during local work. `npm start` is the production entry (`node index.js`).
+
+## Deploy (Vercel + Render + MongoDB Atlas)
+
+This split keeps the React SPA on a CDN and the API next to MongoDB. Do not point the frontend `proxy` field at production — CRA's proxy is local-only.
+
+### 1. MongoDB Atlas
+1. Create a free cluster and a database user.
+2. Allow network access from Render (`0.0.0.0/0` is typical for a student demo; tighten later).
+3. Copy the connection string (`MONGO_URI`).
+
+### 2. Backend on Render
+1. New Web Service from this GitHub repo, **root directory `backend`**.
+2. Build: `npm install` · Start: `npm start`.
+3. Health check path: `/health`.
+4. Environment variables:
+   - `NODE_ENV=production`
+   - `MONGO_URI` — Atlas URI
+   - `JWT_SECRET` — long random string (`openssl rand -hex 32`)
+   - `CLIENT_URL` — your Vercel origin, e.g. `https://your-app.vercel.app` (comma-separate preview URLs if needed)
+5. Optional: apply `render.yaml` in the repo root as a Render Blueprint.
+6. After first deploy, copy the API URL (e.g. `https://placerra-api.onrender.com`).
+
+Resume PDFs are stored on the API disk. Render's free disk is ephemeral — files vanish on restart. That is acceptable for a demo; S3 is the later upgrade.
+
+### 3. Frontend on Vercel
+1. Import the same repo. Set **Root Directory** to `placement_tracker`.
+2. Build: `npm run build` · Output: `build` (CRA default).
+3. Environment variable (must be set **before** the build):
+   - `REACT_APP_API_URL` = Render API origin, **no trailing slash** (`https://placerra-api.onrender.com`)
+4. `vercel.json` already rewrites all paths to `index.html` so `/c/bitmesra/dashboard` works on refresh.
+
+### 4. Smoke test
+- Open the Vercel URL → college search works (hits `/api/institutes/search`).
+- Open `https://your-api.onrender.com/health` → `{ "status": "ok" }`.
+- Log in as student and admin on a seeded tenant.
+- Confirm a hard refresh on a nested route does not 404.
+
+### Local vs production env files
+| File | Purpose |
+|------|---------|
+| `backend/.env.example` | Copy to `backend/.env` |
+| `placement_tracker/.env.example` | Copy to `placement_tracker/.env.local` |
 
 ## Database Design
 

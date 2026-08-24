@@ -33,6 +33,7 @@ import AdminPrivateRoute from './Admin/AdminPrivateRoute';
 import AdminJobsPage from './Admin/components/AdminJobsPage';
 import AdminApplications from './Admin/components/AdminApplications';
 import TenantLayout from './components/TenantLayout';
+import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   const { user, isLoading } = useAuth();
@@ -108,6 +109,8 @@ function App() {
                 </Route>
             </Route>
         </Route>
+
+        <Route path="*" element={<NotFoundPage />} />
 
       </Routes>
     </CollegeProvider>

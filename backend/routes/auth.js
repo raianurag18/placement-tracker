@@ -44,7 +44,7 @@ router.post('/login', authLimiter, validateLogin, asyncHandler(async (req, res) 
             instituteId: user.institute,
             role: user.role
         },
-        process.env.JWT_SECRET || 'your-secret-key-123',
+        process.env.JWT_SECRET,
         { expiresIn: '30d' }
     );
 

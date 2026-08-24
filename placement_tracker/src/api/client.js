@@ -17,6 +17,21 @@
 
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
+/** Absolute URL for files stored on the API host (resumes live on Render, not Vercel). */
+export const fileUrl = (relativePath) => {
+    if (!relativePath) return '';
+    if (/^https?:\/\//i.test(relativePath)) return relativePath;
+    const path = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+    return `${BASE_URL}${path}`;
+};
+
+const friendlyNetworkError = (err) => {
+    if (err instanceof TypeError) {
+        return new Error('Cannot reach the server. Check your connection and try again.');
+    }
+    return err;
+};
+
 /**
  * handleResponse
  * Internal helper: checks status codes and handles auth errors centrally.
@@ -30,7 +45,7 @@ const handleResponse = async (response, slug) => {
         localStorage.removeItem('placerra_user');
         localStorage.removeItem('placerra_token');
         // Redirect to the correct tenant login, not a global /login
-        const loginPath = slug ? `/c/${slug}/login` : '/login';
+        const loginPath = slug ? `/c/${slug}/login` : '/';
         window.location.href = loginPath;
         throw new Error('Session expired. Please log in again.');
     }
@@ -83,12 +98,15 @@ export const tenantFetch = async (slug, path, options = {}) => {
         ...options.headers, // Allow caller to override headers
     };
 
-    const response = await fetch(`${BASE_URL}/api/c/${slug}${path}`, {
-        ...options,
-        headers,
-    });
-
-    return handleResponse(response, slug);
+    try {
+        const response = await fetch(`${BASE_URL}/api/c/${slug}${path}`, {
+            ...options,
+            headers,
+        });
+        return await handleResponse(response, slug);
+    } catch (err) {
+        throw friendlyNetworkError(err);
+    }
 };
 
 /**
@@ -111,20 +129,24 @@ export const adminFetch = async (slug, path, options = {}) => {
         ...options.headers,
     };
 
-    const response = await fetch(`${BASE_URL}/api/c/${slug}${path}`, {
-        ...options,
-        headers,
-    });
+    try {
+        const response = await fetch(`${BASE_URL}/api/c/${slug}${path}`, {
+            ...options,
+            headers,
+        });
 
-    // On 401, redirect to the ADMIN login page (not the student login)
-    if (response.status === 401) {
-        localStorage.removeItem('isAdminLoggedIn');
-        localStorage.removeItem('admin_token');
-        window.location.href = slug ? `/c/${slug}/admin/login` : '/admin/login';
-        throw new Error('Admin session expired.');
+        // On 401, redirect to the ADMIN login page (not the student login)
+        if (response.status === 401) {
+            localStorage.removeItem('isAdminLoggedIn');
+            localStorage.removeItem('admin_token');
+            window.location.href = slug ? `/c/${slug}/admin/login` : '/';
+            throw new Error('Admin session expired.');
+        }
+
+        return await handleResponse(response, slug);
+    } catch (err) {
+        throw friendlyNetworkError(err);
     }
-
-    return handleResponse(response, slug);
 };
 
 /**
@@ -141,10 +163,23 @@ export const globalFetch = async (path, options = {}) => {
         ...options.headers,
     };
 
-    const response = await fetch(`${BASE_URL}/api${path}`, {
-        ...options,
-        headers,
-    });
+    try {
+        const response = await fetch(`${BASE_URL}/api${path}`, {
+            ...options,
+            headers,
+        });
 
-    return handleResponse(response, null);
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.message || `Request failed with status ${response.status}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return response.json();
+        }
+        return null;
+    } catch (err) {
+        throw friendlyNetworkError(err);
+    }
 };

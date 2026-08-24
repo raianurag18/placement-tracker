@@ -7,6 +7,7 @@ import { Label } from "../components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { FileText, Upload, Save, CheckCircle, AlertCircle } from 'lucide-react';
 import { updateProfile, uploadResume } from '../api/profileApi';
+import { fileUrl } from '../api/client';
 
 const ProfilePage = () => {
     const { collegeSlug } = useParams();
@@ -152,7 +153,7 @@ const ProfilePage = () => {
                                 </div>
                             </div>
                             {user.resume && (
-                                <a href={user.resume} target="_blank" rel="noopener noreferrer">
+                                <a href={fileUrl(user.resume)} target="_blank" rel="noopener noreferrer">
                                     <Button variant="outline" size="sm" className="border-slate-300 text-slate-600 hover:bg-slate-100">Download</Button>
                                 </a>
                             )}

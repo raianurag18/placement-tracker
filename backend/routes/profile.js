@@ -15,8 +15,9 @@ const storage = multer.diskStorage({
         if (!req.user) {
             return cb(new Error('User not authenticated'), null);
         }
-        // Group uploads by Institute ID for tenant-level isolation
-        const dir = `uploads/${req.user.institute}/resumes`;
+        // Group uploads by Institute ID for tenant-level isolation.
+        // Resolve from this file so cwd differences on Render/Railway do not scatter files.
+        const dir = path.join(__dirname, '..', 'uploads', String(req.user.institute), 'resumes');
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
         }
@@ -66,8 +67,8 @@ router.post('/resume', protect, upload.single('resume'), asyncHandler(async (req
     }
 
     const user = await User.findById(req.user._id);
-    // Sanitize path separators so they remain web-safe forward slashes on both Windows and Linux
-    user.resume = `/${req.file.path.replace(/\\/g, '/')}`;
+    // Store a web path, never an OS absolute path (Render cwd / Windows drives would break the URL)
+    user.resume = `/uploads/${req.user.institute}/resumes/${req.file.filename}`;
     await user.save();
 
     res.json({ message: 'Resume uploaded successfully', resumeUrl: user.resume });

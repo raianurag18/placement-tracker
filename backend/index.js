@@ -1,4 +1,4 @@
-require('dotenv').config();
+const config = require('./config/env');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -29,14 +29,28 @@ const app = express();
 // ──────────────────────────────────────────────
 // Global Middleware
 // ──────────────────────────────────────────────
+// ⚠️ INTERVIEW TIP: Behind Render/Nginx, Express must trust the proxy so
+// express-rate-limit reads the real client IP from X-Forwarded-For.
+app.set('trust proxy', 1);
+
 // Protects the server by setting secure HTTP headers (defends against XSS, clickjacking, etc.)
-app.use(helmet());
+// API-only server: disable CSP here — the React host (Vercel) owns page CSP.
+// cross-origin CORP lets the frontend fetch uploaded files from this API origin.
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', process.env.CLIENT_URL],
+  origin(origin, callback) {
+    // Non-browser clients (health checks, server-to-server) send no Origin
+    if (!origin) return callback(null, true);
+    if (config.allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(null, false);
+  },
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 // Mount the general API rate limiter to defend against excessive database queries
 const { apiLimiter } = require('./middleware/rateLimiter');
@@ -46,13 +60,16 @@ app.use('/api', apiLimiter);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ──────────────────────────────────────────────
-// MongoDB Connection
+// Health check — used by Render / load balancers (no tenant, no auth)
 // ──────────────────────────────────────────────
-mongoose.connect(process.env.MONGO_URI, {})
-  .then(() => {
-    console.log('✅ MongoDB connected');
-  })
-  .catch((err) => console.error('❌ MongoDB connection error:', err));
+app.get('/health', (req, res) => {
+  const dbState = mongoose.connection.readyState;
+  const dbOk = dbState === 1;
+  res.status(dbOk ? 200 : 503).json({
+    status: dbOk ? 'ok' : 'degraded',
+    db: dbOk ? 'connected' : 'disconnected',
+  });
+});
 
 // ──────────────────────────────────────────────
 // PHASE A — GLOBAL ROUTES (No tenant needed)
@@ -96,17 +113,31 @@ app.use('/api/c/:collegeSlug/profile', tenantResolver, profileRoutes);
 // Resume management — tenant aware
 app.use('/api/c/:collegeSlug/resume', tenantResolver, resumeRoutes);
 
+// Unknown API paths → consistent JSON 404 (not an HTML Express default)
+app.use('/api', (req, res) => {
+  res.status(404).json({ message: `API route not found: ${req.method} ${req.originalUrl}` });
+});
+
 // ──────────────────────────────────────────────
 // Central Error Handler (must be LAST middleware)
 // ──────────────────────────────────────────────
 app.use(errorHandler);
 
 // ──────────────────────────────────────────────
-// Start Server
+// Start Server — connect DB first so we never accept traffic on a dead database
 // ──────────────────────────────────────────────
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
-  console.log(`📡 Tenant routes active: /api/c/:collegeSlug/...`);
-});
+async function start() {
+  await mongoose.connect(config.mongoUri);
+  console.log('✅ MongoDB connected');
 
+  app.listen(config.port, () => {
+    console.log(`🚀 Server is running on http://localhost:${config.port}`);
+    console.log(`📡 Tenant routes active: /api/c/:collegeSlug/...`);
+    console.log(`🌍 NODE_ENV=${config.nodeEnv}`);
+  });
+}
+
+start().catch((err) => {
+  console.error('❌ Failed to start server:', err.message);
+  process.exit(1);
+});
