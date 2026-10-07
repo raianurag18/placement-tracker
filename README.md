@@ -174,9 +174,10 @@ cp .env.example .env    # fill MONGO_URI, JWT_SECRET, CLIENT_URL
 npm install
 npm run dev             # nodemon — http://localhost:5000
 
-# Optional: seed demo tenants + data
-node migrate.js
+# Optional: demo tenants + jobs (empty local DB only — never against production Atlas)
+# Requires ADMIN_PASSWORD and STUDENT_PASSWORD in backend/.env
 node utils/seedTestTenants.js
+node utils/seedJobs.js
 ```
 
 ```bash
@@ -191,6 +192,8 @@ npm start               # http://localhost:3000
 |--------|---------|
 | `npm run dev` (backend) | Local API with nodemon |
 | `npm start` (backend) | Production entry (`node index.js`) — used on Render |
+| `node utils/seedTestTenants.js` | Optional demo colleges/users (needs `ADMIN_PASSWORD`, `STUDENT_PASSWORD`) |
+| `node utils/seedJobs.js` | Optional sample job postings |
 
 ---
 
