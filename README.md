@@ -118,7 +118,7 @@ college_placement_project/
 │   ├── validators/          # Zod schemas
 │   ├── utils/               # Seed scripts
 │   └── index.js
-├── placement_tracker/       # React SPA (deploy root on Vercel)
+├── web/                     # React SPA (deploy root on Vercel)
 │   ├── src/
 │   │   ├── api/             # tenantFetch, adminFetch, globalFetch
 │   │   ├── Admin/           # Admin portal
@@ -181,7 +181,7 @@ node utils/seedTestTenants.js
 
 ```bash
 # Frontend (new terminal)
-cd placement_tracker
+cd web
 cp .env.example .env.local
 npm install
 npm start               # http://localhost:3000
@@ -201,13 +201,13 @@ Monorepo: **same GitHub repo**, two deploy targets.
 | Service | Host | Root directory | Start / build |
 |---------|------|----------------|---------------|
 | API | Render | `backend` | `npm install` · `npm start` · health `/health` |
-| SPA | Vercel | `placement_tracker` | `npm run build` · output `build` |
+| SPA | Vercel | `web` | `npm run build` · output `build` |
 
 ### Backend (Render) — environment variables
 
 | Variable | Example / notes |
 |----------|-----------------|
-| `MONGO_URI` | Atlas connection string with `/placement_tracker` |
+| `MONGO_URI` | Atlas URI; path `/placement_tracker` is the **database name**, not the frontend folder |
 | `JWT_SECRET` | Long random string (`openssl rand -hex 32`) |
 | `NODE_ENV` | `production` |
 | `CLIENT_URL` | `https://placerra.vercel.app` (no trailing slash) |
